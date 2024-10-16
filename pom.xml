@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    (c) Copyright 2024-2024, Agence du Numérique en Santé (ANS) (https://esante.gouv.fr). All rights reserved.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.4</version>
+    <relativePath /> <!-- lookup parent from repository -->
+  </parent>
+  <groupId>fr.gouv.ans.psc</groupId>
+  <artifactId>psc-esante-proxy-example</artifactId>
+  <description>Example d'implémentation de la spécification eSanté Proxy</description>
+  <inceptionYear>2024</inceptionYear>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <!-- license  mvn license:format -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>timestamp-property</id>
+            <goals>
+              <goal>timestamp-property</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <name>license.current.year</name>
+              <pattern>yyyy</pattern>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>4.6</version>
+        <configuration>
+          <header>license/copyright-ans.txt</header>
+          <properties>
+            <owner>Agence du Numérique en Santé (ANS)</owner>
+            <email>https://esante.gouv.fr</email>
+            <year>${project.inceptionYear}-2024</year> 
+          </properties>
+          <defaultUseDefaultExcludes>false</defaultUseDefaultExcludes>
+          <excludes>
+            <exclude>.git/**/*</exclude>
+            <exclude>**/*.json</exclude>
+            <exclude>**/*.ndjson</exclude>
+            <exclude>**/target/**/*</exclude>
+            <exclude>**/*.png</exclude>
+            <exclude>**/*.ico</exclude>
+          </excludes>
+          <mapping>
+            <gitattributes>SCRIPT_STYLE</gitattributes>
+            <hcl>SLASHSTAR_STYLE</hcl>
+            <nomad.tpl>SLASHSTAR_STYLE</nomad.tpl>
+          </mapping>
+          <aggregate>false</aggregate>
+          <strictCheck>true</strictCheck>
+          <properties>
+            <!--
+              This license current year is computed. If we wanted to rebuild an old version without
+              changing license headers, we would just need to add -Dlicense.current.year=XXX to the maven command line.
+            -->
+            <license.current.year>${license.current.year}</license.current.year>
+            <owner>Agence du Numérique en Santé (ANS)</owner>
+            <email>https://esante.gouv.fr</email>
+            <year>${project.inceptionYear}-${license.current.year}</year>
+          </properties>
+        </configuration>
+        <executions>
+          <execution>
+            <id>license-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- END license -->
+    </plugins>
+  </build>
+</project>
