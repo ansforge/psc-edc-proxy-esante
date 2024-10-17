@@ -3,8 +3,11 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy;
 
-import org.junit.jupiter.api.Assertions;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,12 +21,17 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @SpringBootTest(classes = {EsanteProxyApplication.class})
 @AutoConfigureWebTestClient()
 public class SendEndpointTest {
-  @Autowired
-  private WebTestClient testClient;
-  
-  /**
-   * This test dies the second the first real life TC arises.
-   */
+
+  private static final int BAKCEND_1_PORT = 8081;
+
+  @Autowired private WebTestClient testClient;
+
+  @RegisterExtension
+  static WireMockExtension backend1 =
+      WireMockExtension.newInstance()
+          .options(WireMockConfiguration.wireMockConfig().port(BAKCEND_1_PORT))
+          .build();
+
   @Test
   public void binnable(){
     Assertions.assertTrue(true);
