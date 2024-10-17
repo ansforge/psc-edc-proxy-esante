@@ -33,7 +33,18 @@ public class SendEndpointTest {
           .build();
 
   @Test
-  public void binnable(){
-    Assertions.assertTrue(true);
+  public void getFromBackendOne() {
+    final String reponseBody = "{\"status\": \"OK\"}";
+    backend1.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
+
+    testClient
+        .get()
+        .uri("/send/backend-1/rsc1")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .json(reponseBody);
   }
 }

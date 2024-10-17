@@ -1,0 +1,16 @@
+#
+# (c) Copyright 2024-2024, Agence du Numérique en Santé (ANS) (https://esante.gouv.fr). All rights reserved.
+#
+
+server:
+  port: 8080
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: backend-1
+          uri: http://localhost:8081/
+          predicates:
+          - Path=/send/backend-1/{endpoint}
+          filters:
+          - SetPath=/{endpoint}
