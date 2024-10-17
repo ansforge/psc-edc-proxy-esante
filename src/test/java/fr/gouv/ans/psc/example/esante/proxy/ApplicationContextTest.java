@@ -17,7 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
  */
 @SpringBootTest
 @ContextConfiguration(classes = {EsanteProxyApplication.class})
-public class ApplicationLoadTest {
+public class ApplicationContextTest {
   @Autowired private ProxyConfiguration proxyConfiguration;
   
   @Test
