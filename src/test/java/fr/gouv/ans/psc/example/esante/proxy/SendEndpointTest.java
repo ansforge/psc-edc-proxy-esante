@@ -19,7 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
  * @author edegenetais
  */
 @SpringBootTest(classes = {EsanteProxyApplication.class})
-@AutoConfigureWebTestClient()
+@AutoConfigureWebTestClient
 public class SendEndpointTest {
 
   private static final int BAKCEND_1_PORT = 8081;
