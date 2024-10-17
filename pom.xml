@@ -126,12 +126,12 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-gateway</artifactId>
     </dependency>
+    <!-- Outils de test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- Outils de test -->
     <dependency>
       <groupId>org.wiremock</groupId>
       <artifactId>wiremock</artifactId>
