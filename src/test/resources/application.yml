@@ -14,3 +14,9 @@ spring:
           - Path=/send/backend-1/{endpoint}
           filters:
           - SetPath=/{endpoint}
+        - id: backend-2
+          uri: http://localhost:8082/
+          predicates:
+          - Path=/send/backend-2/{endpoint}
+          filters:
+          - SetPath=/{endpoint}
