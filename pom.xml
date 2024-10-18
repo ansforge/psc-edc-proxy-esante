@@ -48,7 +48,6 @@
         <artifactId>jetty-alpn-client</artifactId>
         <version>${jetty.component.version}</version>
       </dependency> 
-      
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-alpn-java-client</artifactId>
@@ -126,6 +125,10 @@
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-gateway</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
     <!-- Outils de test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -189,6 +192,7 @@
             <gitattributes>SCRIPT_STYLE</gitattributes>
             <hcl>SLASHSTAR_STYLE</hcl>
             <nomad.tpl>SLASHSTAR_STYLE</nomad.tpl>
+            <md>XML_STYLE</md>
           </mapping>
           <aggregate>false</aggregate>
           <strictCheck>true</strictCheck>
