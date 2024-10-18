@@ -10,9 +10,10 @@ on:
   pull_request:
 
 jobs:
-  runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
   
-  steps:
-  - uses: actions/checkout@v4
-  - name: Build docker image
-    run: docker buildx . --tag fr.gouv.ans.psc.example.esante.proxy:${GITHUB_SHA}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build docker image
+      run: docker buildx . --tag fr.gouv.ans.psc.example.esante.proxy:${GITHUB_SHA}
