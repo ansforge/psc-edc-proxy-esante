@@ -4,10 +4,7 @@
 package fr.gouv.ans.psc.example.esante.proxy;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
-import fr.gouv.ans.psc.example.esante.proxy.model.Request;
 import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,11 +12,8 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.util.UriBuilder;
 
 /**
@@ -77,6 +71,40 @@ public class GlobalSendBehaviorsTest  extends AbstractProxyIntegrationTest {
     final Trace trace = traces.get(0);
     Assertions.assertEquals("GET", trace.request().methode());
     Assertions.assertEquals("/carebear1", trace.request().path());
+    Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
+    Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
+  }
+  
+  /**
+   * In this test, we'll be sending a get query and checking that we get its trace.
+   * To be sure we're not getting traces from other calls, we'll use the begin parameter.
+   */
+  @Test
+  public void postSendTrace() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .post()
+        .uri("/send/backend-1/carebear2")
+        .exchange().expectStatus().is2xxSuccessful();
+    
+    List<Trace> traces =
+    testClient
+        .get()
+        .uri(
+            (UriBuilder b) ->
+                b.path("/gettrace")
+                    .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                    .build()
+        )
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBodyList(Trace.class)
+        .hasSize(1)
+        .returnResult()
+        .getResponseBody();
+    final Trace trace = traces.get(0);
+    Assertions.assertEquals("POST", trace.request().methode());
+    Assertions.assertEquals("/carebear2", trace.request().path());
     Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
     Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
   }
