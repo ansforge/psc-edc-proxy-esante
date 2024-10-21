@@ -3,9 +3,14 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.model;
 
+import java.time.OffsetDateTime;
+
 /**
  * Élément de trace produit par le système.
  * 
  * @author edegenetais
  */
-public record Trace(Request request){}
+public record Trace(
+    OffsetDateTime timestamp,// Non-conforme pour simplification à ce stade, à rendre conforme plus tard.
+    Request request
+){}

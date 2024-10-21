@@ -11,6 +11,8 @@ import fr.gouv.ans.psc.example.esante.proxy.model.Request;
 import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -57,18 +59,25 @@ public class GlobalSendBehaviorsTest  extends AbstractProxyIntegrationTest {
         .get()
         .uri("/send/backend-1/carebear1")
         .exchange().expectStatus().is2xxSuccessful();
-    testClient
-        .get()
-        .uri(
-            (UriBuilder b) ->
-                b.path("/gettrace")
-                    .queryParam("startDate", testBegin.format(DateTimeFormatter.ISO_INSTANT))
-                    .build()
-        )
-        .exchange()
-        .expectStatus().is2xxSuccessful()
-        .expectBodyList(Trace.class)
-        .hasSize(1)
-        .contains(new Trace(new Request("backend-1", "GET", "/carebear1")));
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/gettrace")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    final Trace trace = traces.get(0);
+    Assertions.assertEquals("GET", trace.request().methode());
+    Assertions.assertEquals("/carebear1", trace.request().path());
+    Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
+    Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
   }
 }
