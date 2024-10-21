@@ -66,7 +66,9 @@ public class GlobalSendBehaviorsTest  extends AbstractProxyIntegrationTest {
                     .build()
         )
         .exchange()
+        .expectStatus().is2xxSuccessful()
         .expectBodyList(Trace.class)
+        .hasSize(1)
         .contains(new Trace(new Request("backend-1", "GET", "/carebear1")));
   }
 }
