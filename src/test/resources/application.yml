@@ -8,6 +8,7 @@ spring:
   cloud:
     gateway:
       routes:
+        # Here we see that no route defines the trace filter => this will not be prone to forgetting them
         - id: backend-1
           uri: http://localhost:8081/
           predicates:
