@@ -3,8 +3,13 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.config;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -13,8 +18,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ProxyConfiguration {
   private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfiguration.class);
-  
-  public ProxyConfiguration() {
+
+  private URI pscDiscoveryURl;
+
+  public ProxyConfiguration(@Value("${psc.discovery.url}") String pscDiscoveryURl) throws URISyntaxException {
+    this.pscDiscoveryURl = new URI(pscDiscoveryURl);
     LOGGER.debug("Proxy configuration loaded");
   }
+
+  public URI getPscDiscoveryURl() {
+    return pscDiscoveryURl;
+  }
+  
 }

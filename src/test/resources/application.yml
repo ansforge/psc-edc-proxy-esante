@@ -21,3 +21,6 @@ spring:
           - Path=/send/backend-2/{endpoint}
           filters:
           - SetPath=/{endpoint}
+psc:
+  discovery:
+    url: http://localhost:8443/auth/realms/esante-wallet/.well-known/wallet-openid-configuration

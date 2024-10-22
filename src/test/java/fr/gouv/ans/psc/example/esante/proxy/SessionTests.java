@@ -28,14 +28,17 @@ import org.springframework.web.util.UriBuilder;
 @SpringBootTest(classes = {EsanteProxyApplication.class})
 @AutoConfigureWebTestClient
 public class SessionTests {
+  private static final String ID_NAT = "500000001815646/CPAT00045";
+  
   @Autowired 
   private WebTestClient testClient;
   private String discoveryData;
-  
+
   @RegisterExtension
-  protected static WireMockExtension pscMock = WireMockExtension.newInstance()
-      .options(WireMockConfiguration.wireMockConfig().port(8443))
-      .build();
+  protected static WireMockExtension pscMock =
+      WireMockExtension.newInstance()
+          .options(WireMockConfiguration.wireMockConfig().port(8443))
+          .build();
 
   @BeforeEach
   public void setBasePscMockBehavior() throws IOException{
@@ -45,24 +48,24 @@ public class SessionTests {
                 WireMock.urlEqualTo(
                     "/auth/realms/esante-wallet/.well-known/wallet-openid-configuration"))
             .willReturn(WireMock.okJson(discoveryData)));
-  }
-  
-  @Test
-  public void passingConnectQueryReturnsSession() {
-
-    pscMock.stubFor(
+    
+        pscMock.stubFor(
         WireMock.post(
                 WireMock.urlEqualTo(
                     "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
             .willReturn(WireMock.okJson(
 """
 {
-  "auth_req_id"="notAvalidToken",
+  "auth_req_id": "notAvalidToken",
   "expires_in": 120,
   "interval": 5
 }
 """
             )));
+  }
+
+  @Test
+  public void passingConnectQueryReturnsSession() {
 
     Session session =
         testClient
@@ -70,7 +73,7 @@ public class SessionTests {
             .uri(
                 (UriBuilder b) ->
                     b.path("/connect")
-                        .queryParam("nationalId", "500000001815646/CPAT00045")
+                        .queryParam("nationalId", ID_NAT)
                         .queryParam("bindingMessage", "00")
                         .queryParam("clientId", "client-id-of-test")
                         .build())
@@ -84,4 +87,24 @@ public class SessionTests {
     Assertions.assertFalse(session.proxySessionId().isBlank(), "Session Id must no be empty.");
     Assertions.assertFalse(session.sessionState().isBlank(), "Session state must not be null");
   }
+  
+  @Test
+  public void passingConnectQueryCallsAuthEndpoint() {
+    testClient
+      .get()
+      .uri((UriBuilder b) ->
+          b.path("/connect")
+            .queryParam("nationalId", ID_NAT)
+            .queryParam("bindingMessage", "00")
+            .queryParam("clientId", "client-id-of-test")
+            .build());
+    
+    pscMock.verify(1, 
+      WireMock.postRequestedFor(
+        WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth")
+      ).withFormParam("binding_message", WireMock.equalTo("00"))
+       .withFormParam("login_hint", WireMock.equalTo(ID_NAT))
+    );
+  }
+  
 }

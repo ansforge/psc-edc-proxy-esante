@@ -1,13 +1,13 @@
 {
     "issuer": "http://localhost:8443/auth/realms/esante-wallet",
-    "authorization_endpoint": "https://wallet.bas.psc.esante.gouv.fr/auth",
+    "authorization_endpoint": "httpss://wallet.bas.psc.esante.gouv.fr/auth",
     "token_endpoint": "http://localhost:8443/auth/realms/esante-wallet/protocol/openid-connect/token",
     "introspection_endpoint": "http://localhost:8443/auth/realms/esante-wallet/protocol/openid-connect/token/introspect",
     "userinfo_endpoint": "http://localhost:8443/auth/realms/esante-wallet/protocol/openid-connect/userinfo",
     "end_session_endpoint": "http://localhost:8443/auth/realms/esante-wallet/protocol/openid-connect/logout",
     "frontchannel_logout_session_supported": true,
     "frontchannel_logout_supported": true,
-    "jwks_uri": "http://localhost:8443/auth/realms/esante-wallet/protocol/openid-connect/certs",
+    "jwks_uri": "http://localhosts:8443/auth/realms/esante-wallet/protocol/openid-connect/certs",
     "check_session_iframe": "http://localhost:8443/auth/realms/esante-wallet/protocol/openid-connect/login-status-iframe.html",
     "grant_types_supported": [
         "authorization_code",
