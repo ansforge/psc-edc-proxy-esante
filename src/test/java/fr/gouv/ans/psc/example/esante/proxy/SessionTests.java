@@ -6,9 +6,9 @@ package fr.gouv.ans.psc.example.esante.proxy;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Properties;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +48,7 @@ public class SessionTests {
   }
   
   @Test
-  public void passingConnectQuery() {
+  public void passingConnectQueryReturnsSession() {
 
     pscMock.stubFor(
         WireMock.post(
@@ -64,23 +64,24 @@ public class SessionTests {
 """
             )));
 
-    Properties session =
+    Session session =
         testClient
             .get()
             .uri(
-              (UriBuilder b) ->
-                b.path("/connect")
-                  .queryParam("nationalId", "500000001815646/CPAT00045")
-                  .queryParam("bindingMessage", "00")
-                  .queryParam("clientId", "client-id-of-test")
-                  .build())
+                (UriBuilder b) ->
+                    b.path("/connect")
+                        .queryParam("nationalId", "500000001815646/CPAT00045")
+                        .queryParam("bindingMessage", "00")
+                        .queryParam("clientId", "client-id-of-test")
+                        .build())
             .exchange()
             .expectStatus()
             .isOk()
-            .expectBody(Properties.class)
-            .returnResult().getResponseBody();
+            .expectBody(Session.class)
+            .returnResult()
+            .getResponseBody();
     Assertions.assertNotNull(session);
-    Assertions.assertNotNull(session.get("proxy_session_id"));
-    Assertions.assertNotNull(session.get("session_state"));
+    Assertions.assertFalse(session.proxySessionId().isBlank(), "Session Id must no be empty.");
+    Assertions.assertFalse(session.sessionState().isBlank(), "Session state must not be null");
   }
 }
