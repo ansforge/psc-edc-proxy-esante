@@ -16,7 +16,7 @@ import com.nimbusds.oauth2.sdk.ciba.CIBAResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
-import fr.gouv.ans.psc.example.esante.proxy.config.ProxyConfiguration;
+import fr.gouv.ans.psc.example.esante.proxy.config.CIBAConfiguration;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import fr.gouv.ans.psc.example.esante.proxy.service.TokenPollResponse;
 import java.io.IOException;
@@ -44,9 +44,9 @@ import reactor.core.publisher.Mono;
  */
 @RestController
 public class SessionController {
-  private ProxyConfiguration cfg;
+  private CIBAConfiguration cfg;
 
-  public SessionController(@Autowired ProxyConfiguration cfg) {
+  public SessionController(@Autowired CIBAConfiguration cfg) {
     this.cfg = cfg;
   }
   
