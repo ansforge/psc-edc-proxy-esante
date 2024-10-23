@@ -6,9 +6,12 @@ package fr.gouv.ans.psc.example.esante.proxy;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import com.github.tomakehurst.wiremock.stubbing.Scenario;
+import com.nimbusds.jwt.JWTParser;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +32,11 @@ import org.springframework.web.util.UriBuilder;
 @AutoConfigureWebTestClient
 public class SessionTests {
   private static final String ID_NAT = "500000001815646/CPAT00045";
+  private static final String TEST_CLIENT_ID = "client-id-of-test";
+  private static final String AUT_REQ_ID = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im15LWF1dGgtcmVxLWlkLTI1NSJ9.zCIf0ngT65O3wXeWsUetWasqAYBNsq1_m-wEUc_QhkQ";
+  private static final String REFRESH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoX2lkIjoibXktYXV0aC1yZXEtaWQtMjU1In0._kXdSg6CSbCGidMzlw2CWoZ37QeSLSg9WyLja1ToBs4";
+  private static final String TEST_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJzZXNzaW9uX3N0YXRlIjoic2Vzc2lvbi1zdGF0ZS0yNTYteHh4In0.ut7H8Xpxz-6HobZdhH9UF6o5Hdzuv_hdvur-VhDAf4Y";
+  private static final String TEST_ID_TOKEN = TEST_ACCESS_TOKEN;//FIXME later
   
   @Autowired 
   private WebTestClient testClient;
@@ -54,28 +62,53 @@ public class SessionTests {
                 WireMock.urlEqualTo(
                     "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
             .willReturn(WireMock.okJson(
+                "{\"auth_req_id\": \""+AUT_REQ_ID+"\", \"expires_in\": 120, \"interval\": 5}"
+            )));
+
+    pscMock.stubFor(
+        WireMock.post(
+                WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/token"))
+            .inScenario("Poll once then get token")
+            .whenScenarioStateIs(Scenario.STARTED)
+            .willSetStateTo("First probe done")
+            .willReturn(
+                WireMock.jsonResponse(
 """
 {
-  "auth_req_id": "notAvalidToken",
-  "expires_in": 120,
-  "interval": 5
+  "error":"authorization_pending",
+  "error_description":"The authorization request is still pending as the end-user hasn't yet been authenticated."
 }
-"""
-            )));
+""",
+                400)
+            )
+    );
+    pscMock.stubFor(
+        WireMock.post(
+                WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/token"))
+            .inScenario("Poll once then get token")
+            .whenScenarioStateIs("First probe done")
+            .willReturn(
+                WireMock.okJson(
+                    "{\"access_token\": \""
+                        + TEST_ACCESS_TOKEN
+                        + "\",\"expires_in\": 120,\"refresh_token\": \""
+                        + REFRESH_TOKEN
+                        + "\",\"refresh_expires_in\": 350,\"token_type\":\"Bearer\",\"id_token\":\""
+                        + TEST_ID_TOKEN
+                        + "\",\"scope\": \"openid ciba\"}")));
   }
 
   @Test
-  public void passingConnectQueryReturnsSession() {
-
+  public void passingConnectQueryReturnsSession() throws ParseException {
+    String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
     Session session =
         testClient
             .get()
-            .uri(
-                (UriBuilder b) ->
+            .uri((UriBuilder b) ->
                     b.path("/connect")
                         .queryParam("nationalId", ID_NAT)
                         .queryParam("bindingMessage", "00")
-                        .queryParam("clientId", "client-id-of-test")
+                        .queryParam("clientId", TEST_CLIENT_ID)
                         .build())
             .exchange()
             .expectStatus()
@@ -83,9 +116,10 @@ public class SessionTests {
             .expectBody(Session.class)
             .returnResult()
             .getResponseBody();
+    
     Assertions.assertNotNull(session);
     Assertions.assertFalse(session.proxySessionId().isBlank(), "Session Id must no be empty.");
-    Assertions.assertFalse(session.sessionState().isBlank(), "Session state must not be null");
+    Assertions.assertEquals(expectedSessionState,session.sessionState());
   }
   
   @Test
@@ -96,8 +130,10 @@ public class SessionTests {
           b.path("/connect")
             .queryParam("nationalId", ID_NAT)
             .queryParam("bindingMessage", "00")
-            .queryParam("clientId", "client-id-of-test")
-            .build());
+            .queryParam("clientId", TEST_CLIENT_ID)
+            .build())
+      .exchange()
+        .expectStatus().isOk();
     
     pscMock.verify(1, 
       WireMock.postRequestedFor(
