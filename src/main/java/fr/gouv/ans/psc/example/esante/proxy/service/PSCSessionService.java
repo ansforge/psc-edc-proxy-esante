@@ -53,9 +53,11 @@ public class PSCSessionService {
         .debug("Trying provider URL {}", cfg.getDiscoveryURL().toString());
 
     OIDCProviderMetadata providerMetadata = getMetadata();
+    
+    final Credential credential = this.cfg.getSecret(clientId);
 
     final ClientSecretBasic clientAuthentication =
-        new ClientSecretBasic(new ClientID(clientId), new Secret(this.cfg.getSecret(clientId).secret()));
+        new ClientSecretBasic(new ClientID(clientId), new Secret(credential.secret()));
 
     CIBARequest req =
         new CIBARequest.Builder(clientAuthentication, new Scope("openid all"))
@@ -73,7 +75,9 @@ public class PSCSessionService {
       Integer pollInterval = response.toRequestAcknowledgement().getMinWaitInterval();
 
       URI tokenURI = providerMetadata.getTokenEndpointURI();
-      WebClient client = WebClient.create(tokenURI.toString());
+      WebClientFactory clientFactory = new WebClientFactory(clientId, credential);
+      WebClient client = clientFactory.build(tokenURI.toString());
+      
       CIBASession tokenReponse = null;
       do {
         Mono<CIBASession> tokenResponseMono =

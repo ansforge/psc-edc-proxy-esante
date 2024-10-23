@@ -3,6 +3,7 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy;
 
+import com.github.tomakehurst.wiremock.client.BasicCredentials;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
@@ -37,6 +38,7 @@ public class SessionTests {
   private static final String REFRESH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoX2lkIjoibXktYXV0aC1yZXEtaWQtMjU1In0._kXdSg6CSbCGidMzlw2CWoZ37QeSLSg9WyLja1ToBs4";
   private static final String TEST_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJzZXNzaW9uX3N0YXRlIjoic2Vzc2lvbi1zdGF0ZS0yNTYteHh4In0.ut7H8Xpxz-6HobZdhH9UF6o5Hdzuv_hdvur-VhDAf4Y";
   private static final String TEST_ID_TOKEN = TEST_ACCESS_TOKEN;//FIXME later
+  private static final String MY_CLIENT_SECRET = "my_client_secret";
   
   @Autowired 
   private WebTestClient testClient;
@@ -143,4 +145,29 @@ public class SessionTests {
     );
   }
   
+  @Test
+  public void secretClientCredsGiveBasic() {
+    testClient
+      .get()
+      .uri((UriBuilder b) ->
+          b.path("/connect")
+            .queryParam("nationalId", ID_NAT)
+            .queryParam("bindingMessage", "00")
+            .queryParam("clientId", TEST_CLIENT_ID)
+            .build())
+      .exchange()
+        .expectStatus().isOk();
+
+     pscMock.verify(1,
+        WireMock.postRequestedFor(
+                WireMock.urlEqualTo(
+                    "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
+            .withBasicAuth(new BasicCredentials(TEST_CLIENT_ID, MY_CLIENT_SECRET)));
+    
+    pscMock.verify(2,
+        WireMock.postRequestedFor(
+                WireMock.urlEqualTo(
+                    "/auth/realms/esante-wallet/protocol/openid-connect/token"))
+            .withBasicAuth(new BasicCredentials(TEST_CLIENT_ID, MY_CLIENT_SECRET)));
+  }
 }
