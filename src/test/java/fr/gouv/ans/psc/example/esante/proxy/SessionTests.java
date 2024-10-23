@@ -170,4 +170,30 @@ public class SessionTests {
                     "/auth/realms/esante-wallet/protocol/openid-connect/token"))
             .withBasicAuth(new BasicCredentials(TEST_CLIENT_ID, MY_CLIENT_SECRET)));
   }
+
+  
+  @Test
+  public void sslCredReturnsSession() throws ParseException {
+    String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
+    Session session =
+        testClient
+            .get()
+            .uri((UriBuilder b) ->
+                    b.path("/connect")
+                        .queryParam("nationalId", ID_NAT)
+                        .queryParam("bindingMessage", "00")
+                        .queryParam("clientId", "client-with-cert")
+                        .build())
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(Session.class)
+            .returnResult()
+            .getResponseBody();
+    
+    Assertions.assertNotNull(session);
+    Assertions.assertFalse(session.proxySessionId().isBlank(), "Session Id must no be empty.");
+    Assertions.assertEquals(expectedSessionState,session.sessionState());
+  }
+  
 }
