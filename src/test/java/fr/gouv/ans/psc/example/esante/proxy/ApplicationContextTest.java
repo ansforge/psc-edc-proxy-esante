@@ -3,7 +3,7 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy;
 
-import fr.gouv.ans.psc.example.esante.proxy.config.CIBAConfiguration;
+import fr.gouv.ans.psc.example.esante.proxy.config.PSCConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 @SpringBootTest
 @ContextConfiguration(classes = {EsanteProxyApplication.class})
 public class ApplicationContextTest {
-  @Autowired private CIBAConfiguration cibaConfiguration;
+  @Autowired private PSCConfiguration cibaConfiguration;
   
   @Test
   public void applicationLoads() {

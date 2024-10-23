@@ -22,5 +22,11 @@ spring:
           filters:
           - SetPath=/{endpoint}
 psc:
-  discovery:
-    url: http://localhost:8443/auth/realms/esante-wallet/.well-known/wallet-openid-configuration
+  discoveryURL: http://localhost:8443/auth/realms/esante-wallet/.well-known/wallet-openid-configuration
+  clients:
+    client-id-of-test:
+      type: SECRET,
+      secret: my_client_secret
+    client-id2-of-test: 
+      type: SECRET,
+      secret: the_other_client_secret
