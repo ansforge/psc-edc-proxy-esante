@@ -31,7 +31,7 @@ psc:
     client-id2-of-test: 
       type: SECRET,
       secret: the_other_client_secret
-# MTLS permet d'utiliser des certificats clients (nu par client du proxy) pour faire les requêtesCIBA
+# MTLS permet d'utiliser des certificats clients (un par client du proxy) pour faire les requêtesCIBA
     client-with-cert:
       type: MTLS
       secret: CLIENTpass
