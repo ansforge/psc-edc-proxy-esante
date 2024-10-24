@@ -11,6 +11,7 @@ import fr.gouv.ans.psc.example.esante.proxy.service.CIBASession;
 import fr.gouv.ans.psc.example.esante.proxy.service.PSCSessionService;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,13 +38,15 @@ public class SessionController {
       @RequestParam("bindingMessage") String bindingMessage,
       @RequestParam("clientId") String clientId) throws IOException, ParseException, InterruptedException, ExecutionException, java.text.ParseException{
     
-    CIBASession session = this.cibaService.cibaAuthentication(bindingMessage,nationalId,clientId);
-   
-    JWT payload = JWTParser.parse(session.accessToken());
-    
-    String sessionState = payload.getJWTClaimsSet().getClaim("session_state").toString();
-    
-    return Mono.just(new Session(UUID.randomUUID().toString(), sessionState));
-    
+    Callable<Session> sessionSupplier =
+        () -> {
+          CIBASession session = this.cibaService.cibaAuthentication(bindingMessage,nationalId,clientId);
+          JWT payload = JWTParser.parse(session.accessToken());
+
+          String sessionState = payload.getJWTClaimsSet().getClaim("session_state").toString();
+          return new Session(UUID.randomUUID().toString(), sessionState);
+        };
+
+    return Mono.fromCallable(sessionSupplier);
   }
 }
