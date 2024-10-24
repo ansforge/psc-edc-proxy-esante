@@ -64,7 +64,7 @@ public class SessionTests {
                 WireMock.urlEqualTo(
                     "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
             .willReturn(WireMock.okJson(
-                "{\"auth_req_id\": \""+AUT_REQ_ID+"\", \"expires_in\": 120, \"interval\": 5}"
+                "{\"auth_req_id\": \""+AUT_REQ_ID+"\", \"expires_in\": 120, \"interval\": 1}"
             )));
 
     pscMock.stubFor(
