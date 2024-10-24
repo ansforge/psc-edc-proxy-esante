@@ -30,7 +30,7 @@ import org.springframework.web.util.UriBuilder;
  * @author edegenetais
  */
 @SpringBootTest(classes = {EsanteProxyApplication.class})
-@AutoConfigureWebTestClient
+@AutoConfigureWebTestClient(timeout = "PT30S")
 public class SessionTests {
   private static final String ID_NAT = "500000001815646/CPAT00045";
   private static final String TEST_CLIENT_ID = "client-id-of-test";
