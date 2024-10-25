@@ -99,7 +99,7 @@ public class PSCSessionService {
       } while (tokenReponse.isPending());
       return tokenReponse;
     } else {
-      throw new AuthenticationFailure();
+      throw new AuthenticationFailure(response);
     }
   }
 
