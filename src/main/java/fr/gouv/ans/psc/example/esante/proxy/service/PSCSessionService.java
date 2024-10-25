@@ -22,13 +22,11 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -76,7 +74,6 @@ public class PSCSessionService {
     CIBAResponse response = CIBAResponse.parse(req.toHTTPRequest().send());
     if (response.indicatesSuccess()) {
       String authRequestId = response.toRequestAcknowledgement().getAuthRequestID().getValue();
-      Integer expiresIn = response.toRequestAcknowledgement().getExpiresIn();
       Integer pollInterval = response.toRequestAcknowledgement().getMinWaitInterval();
 
       URI tokenURI = providerMetadata.getTokenEndpointURI();
