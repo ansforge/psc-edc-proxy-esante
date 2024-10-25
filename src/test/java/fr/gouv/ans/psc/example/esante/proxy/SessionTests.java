@@ -30,7 +30,7 @@ import org.springframework.web.util.UriBuilder;
  * @author edegenetais
  */
 @SpringBootTest(classes = {EsanteProxyApplication.class})
-@AutoConfigureWebTestClient
+@AutoConfigureWebTestClient(timeout = "PT30S")
 public class SessionTests {
   private static final String ID_NAT = "500000001815646/CPAT00045";
   private static final String TEST_CLIENT_ID = "client-id-of-test";
@@ -64,7 +64,7 @@ public class SessionTests {
                 WireMock.urlEqualTo(
                     "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
             .willReturn(WireMock.okJson(
-                "{\"auth_req_id\": \""+AUT_REQ_ID+"\", \"expires_in\": 120, \"interval\": 5}"
+                "{\"auth_req_id\": \""+AUT_REQ_ID+"\", \"expires_in\": 120, \"interval\": 1}"
             )));
 
     pscMock.stubFor(
@@ -142,6 +142,7 @@ public class SessionTests {
         WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth")
       ).withFormParam("binding_message", WireMock.equalTo("00"))
        .withFormParam("login_hint", WireMock.equalTo(ID_NAT))
+       .withFormParam("scope", WireMock.equalTo("openid scope_all"))
     );
   }
   

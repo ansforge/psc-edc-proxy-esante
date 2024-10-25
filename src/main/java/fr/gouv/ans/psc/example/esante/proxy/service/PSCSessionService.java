@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,8 @@ import reactor.core.publisher.Mono;
  */
 @Component
 public class PSCSessionService {
+  private static final String PSC_CIBA_SCOPES = "openid scope_all";
+  
   private PSCConfiguration cfg;
   
   public PSCSessionService(
@@ -60,7 +63,7 @@ public class PSCSessionService {
         new ClientSecretBasic(new ClientID(clientId), new Secret(credential.secret()));
 
     CIBARequest req =
-        new CIBARequest.Builder(clientAuthentication, new Scope("openid all"))
+        new CIBARequest.Builder(clientAuthentication, new Scope(PSC_CIBA_SCOPES))
             .endpointURI(providerMetadata.getBackChannelAuthenticationEndpointURI())
             .acrValues(List.of(new ACR("eidas1")))
             .bindingMessage(bindingMessage)
@@ -71,7 +74,6 @@ public class PSCSessionService {
     CIBAResponse response = CIBAResponse.parse(req.toHTTPRequest().send());
     if (response.indicatesSuccess()) {
       String authRequestId = response.toRequestAcknowledgement().getAuthRequestID().getValue();
-      Integer expiresIn = response.toRequestAcknowledgement().getExpiresIn();
       Integer pollInterval = response.toRequestAcknowledgement().getMinWaitInterval();
 
       URI tokenURI = providerMetadata.getTokenEndpointURI();
@@ -80,6 +82,7 @@ public class PSCSessionService {
       
       CIBASession tokenReponse = null;
       do {
+        Thread.sleep(Duration.ofSeconds(pollInterval));
         Mono<CIBASession> tokenResponseMono =
             client
                 .post()
@@ -95,7 +98,7 @@ public class PSCSessionService {
       } while (tokenReponse.isPending());
       return tokenReponse;
     } else {
-      throw new AuthenticationFailure();
+      throw new AuthenticationFailure(response);
     }
   }
 
