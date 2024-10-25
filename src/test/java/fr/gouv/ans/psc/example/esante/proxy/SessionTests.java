@@ -142,6 +142,7 @@ public class SessionTests {
         WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth")
       ).withFormParam("binding_message", WireMock.equalTo("00"))
        .withFormParam("login_hint", WireMock.equalTo(ID_NAT))
+       .withFormParam("scope", WireMock.equalTo("openid scope_all"))
     );
   }
   
