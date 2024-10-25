@@ -15,6 +15,7 @@
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
   <groupId>fr.gouv.ans.psc</groupId>
+  <version>0.0.1-SNAPSHOT</version>
   <artifactId>psc-esante-proxy-example</artifactId>
   <description>Example d'implémentation de la spécification eSanté Proxy</description>
   <inceptionYear>2024</inceptionYear>
