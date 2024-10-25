@@ -19,9 +19,13 @@ public class AbstractProxyIntegrationTest {
   protected static final int BAKCEND_1_PORT = 8081;
   protected static final int BAKCEND_2_PORT = 8082;
   @RegisterExtension
-  protected static WireMockExtension backend1 = WireMockExtension.newInstance().options(WireMockConfiguration.wireMockConfig().port(BAKCEND_1_PORT)).build();
+  protected static WireMockExtension backend1 = WireMockExtension.newInstance()
+      .options(WireMockConfiguration.wireMockConfig().port(BAKCEND_1_PORT))
+      .build();
   @RegisterExtension
-  protected static WireMockExtension backend2 = WireMockExtension.newInstance().options(WireMockConfiguration.wireMockConfig().port(BAKCEND_2_PORT)).build();
+  protected static WireMockExtension backend2 = WireMockExtension.newInstance()
+      .options(WireMockConfiguration.wireMockConfig().port(BAKCEND_2_PORT))
+      .build();
   @Autowired
   protected WebTestClient testClient;
   

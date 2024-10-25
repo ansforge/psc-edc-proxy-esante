@@ -74,7 +74,7 @@
         <artifactId>jetty-io</artifactId>
         <version>${jetty.component.version}</version>
       </dependency>
-       <dependency>
+      <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-proxy</artifactId>
         <version>${jetty.component.version}</version>
@@ -84,7 +84,7 @@
         <artifactId>jetty-server</artifactId>
         <version>${jetty.component.version}</version>
       </dependency>
-       <dependency>
+      <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-security</artifactId>
         <version>${jetty.component.version}</version>
@@ -129,6 +129,15 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>oauth2-oidc-sdk</artifactId>
+      <version>11.19.1</version>
     </dependency>
     <!-- Outils de test -->
     <dependency>

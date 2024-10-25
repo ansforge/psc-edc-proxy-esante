@@ -5,11 +5,13 @@ package fr.gouv.ans.psc.example.esante.proxy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
  * @author edegenetais
  */
 @SpringBootApplication
+@ConfigurationPropertiesScan("fr.gouv.ans.psc.example.esante.proxy.config")
 public class EsanteProxyApplication {
   public static void main(String[] args) {
     SpringApplication.run(EsanteProxyApplication.class, args);
