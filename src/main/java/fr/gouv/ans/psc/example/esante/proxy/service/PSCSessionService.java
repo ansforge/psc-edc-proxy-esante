@@ -41,6 +41,8 @@ import reactor.core.publisher.Mono;
  */
 @Component
 public class PSCSessionService {
+  private static final String PSC_CIBA_SCOPES = "openid scope_all";
+  
   private PSCConfiguration cfg;
   
   public PSCSessionService(
@@ -63,7 +65,7 @@ public class PSCSessionService {
         new ClientSecretBasic(new ClientID(clientId), new Secret(credential.secret()));
 
     CIBARequest req =
-        new CIBARequest.Builder(clientAuthentication, new Scope("openid all"))
+        new CIBARequest.Builder(clientAuthentication, new Scope(PSC_CIBA_SCOPES))
             .endpointURI(providerMetadata.getBackChannelAuthenticationEndpointURI())
             .acrValues(List.of(new ACR("eidas1")))
             .bindingMessage(bindingMessage)
