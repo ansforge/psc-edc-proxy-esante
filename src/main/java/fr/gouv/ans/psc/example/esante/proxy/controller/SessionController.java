@@ -37,11 +37,12 @@ public class SessionController {
   public Mono<Session> connect(
       @RequestParam("nationalId") String nationalId, 
       @RequestParam("bindingMessage") String bindingMessage,
-      @RequestParam("clientId") String clientId) throws IOException, ParseException, InterruptedException, ExecutionException, java.text.ParseException{
+      @RequestParam("clientId") String clientId,
+      @RequestParam("channel") String channel) throws IOException, ParseException, InterruptedException, ExecutionException, java.text.ParseException{
     
     Callable<Session> sessionSupplier =
         () -> {
-          CIBASession session = this.cibaService.cibaAuthentication(bindingMessage,nationalId,clientId);
+          CIBASession session = this.cibaService.cibaAuthentication(bindingMessage,nationalId,clientId, channel);
           return new Session(UUID.randomUUID().toString(), session.sessionState());
         };
 

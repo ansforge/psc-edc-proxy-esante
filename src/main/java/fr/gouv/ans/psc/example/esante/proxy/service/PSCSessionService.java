@@ -48,7 +48,7 @@ import fr.gouv.ans.psc.example.esante.proxy.controller.SessionController;
 @Component
 public class PSCSessionService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PSCSessionService.class);
+	private static final Logger log = LoggerFactory.getLogger(PSCSessionService.class);
 
 	private static final String PSC_CIBA_SCOPES = "openid scope_all";
 
@@ -58,10 +58,10 @@ public class PSCSessionService {
 		this.cfg = cfg;
 	}
 
-	public CIBASession cibaAuthentication(String bindingMessage, String nationalId, String clientId)
+	public CIBASession cibaAuthentication(String bindingMessage, String nationalId, String clientId, String channel)
 			throws IOException, ParseException, InterruptedException, ExecutionException {
 
-		LoggerFactory.getLogger(SessionController.class).debug("Trying provider URL {}",
+		log.debug("Trying provider URL {}",
 				cfg.getDiscoveryURL().toString());
 
 		OIDCProviderMetadata providerMetadata = getMetadata();
@@ -74,7 +74,7 @@ public class PSCSessionService {
 		CIBARequest req = new CIBARequest.Builder(clientAuthentication, new Scope(PSC_CIBA_SCOPES))
 				.endpointURI(providerMetadata.getBackChannelAuthenticationEndpointURI())
 				.acrValues(List.of(new ACR("eidas1"))).bindingMessage(bindingMessage).loginHint(nationalId)
-				.customParameter("channel", "CARD").build();
+				.customParameter("channel", channel).build();
 
 		CIBAResponse response = CIBAResponse.parse(req.toHTTPRequest().send());
 		if (response.indicatesSuccess()) {
@@ -84,7 +84,7 @@ public class PSCSessionService {
 			AuthRequestID cibaRequestID = acknowledgement.getAuthRequestID();
 			int expiresIn = acknowledgement.getExpiresIn();
 			int pollInterval = acknowledgement.getMinWaitInterval();
-			LOGGER.info("Préparation de la requête de polling");
+			log.info("Préparation de la requête de polling");
 			
 			TokenRequest tokenRequest = new TokenRequest.Builder(tokenURI, clientAuthentication,
 					new CIBAGrant(cibaRequestID)).build();
@@ -94,9 +94,9 @@ public class PSCSessionService {
 				Thread.sleep(Duration.ofSeconds(pollInterval));
 				expiresIn -= pollInterval;
 				tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
-				LOGGER.debug("TokenResponse : {}", tokenResponse.toHTTPResponse().getBody());
-				LOGGER.debug("ExpiresIn : {}", expiresIn );
-				LOGGER.debug("tokenResponse Indicates Success : {}", tokenResponse.indicatesSuccess()); 
+				log.debug("TokenResponse : {}", tokenResponse.toHTTPResponse().getBody());
+				log.debug("ExpiresIn : {}", expiresIn );
+				log.debug("tokenResponse Indicates Success : {}", tokenResponse.indicatesSuccess()); 
 			} while (!tokenResponse.indicatesSuccess() && expiresIn >= 0);
 
 			if (tokenResponse.indicatesSuccess()) {
@@ -104,8 +104,8 @@ public class PSCSessionService {
 				JWT idToken = successResponse.getOIDCTokens().getIDToken();
 				BearerAccessToken accessToken = successResponse.getOIDCTokens().getBearerAccessToken();
 				RefreshToken refreshToken = successResponse.getOIDCTokens().getRefreshToken();
-				LOGGER.debug("refreshToken : {}", refreshToken.toJSONString());
-				LOGGER.debug("accessToken : {}", accessToken.toJSONString());
+				log.debug("refreshToken : {}", refreshToken.toJSONString());
+				log.debug("accessToken : {}", accessToken.toJSONString());
 				return new CIBASession(
 						accessToken.getValue(),
 						(int) accessToken.getLifetime(),
