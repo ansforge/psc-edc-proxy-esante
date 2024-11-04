@@ -97,7 +97,7 @@ public class SessionTests {
                         + REFRESH_TOKEN
                         + "\",\"refresh_expires_in\": 350,\"token_type\":\"Bearer\",\"id_token\":\""
                         + TEST_ID_TOKEN
-                        + "\",\"scope\": \"openid ciba\"}")));
+                        + "\",\"scope\": \"openid ciba\", \"session_state\": \"session-state-256-xxx\"}")));
   }
 
   @Test
