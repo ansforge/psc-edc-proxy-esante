@@ -7,6 +7,12 @@ server:
 spring:
   cloud:
     gateway:
+    # Cette configuration de test définit deux Fournisseurs de Service aval
+    # pour valider la bonne intégration de spring-gateway.
+    # Dans une configuration de production, toutes les routes doivent être définies 
+    # sur la base d'un chemin commençant par `/send` pour respecter le contrat d'API du proxy eSanté.
+    # Le second élément du path définit le service cible, et la suite l'endpoint visé.
+    # /send/<nom symbolique service aval>/<endpoint>
       routes:
         # Here we see that no route defines the trace filter => this will not be prone to forgetting them
         - id: backend-1
