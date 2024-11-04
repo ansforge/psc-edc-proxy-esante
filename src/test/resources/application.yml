@@ -14,7 +14,7 @@ spring:
     # Le second élément du path définit le service cible, et la suite l'endpoint visé.
     # /send/<nom symbolique service aval>/<endpoint>
       routes:
-        # Here we see that no route defines the trace filter => this will not be prone to forgetting them
+        # Ici, nous voyons qu'aucune route ne définit le filtre 'trace' => il est défini globalement par le code, ce qui évite les oublis.
         - id: backend-1
           uri: http://localhost:8081/
           predicates:
