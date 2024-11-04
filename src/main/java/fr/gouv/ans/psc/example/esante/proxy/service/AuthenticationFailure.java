@@ -3,16 +3,14 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ErrorResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Exception utilisée pour signaler un échec fonctionnel de l'authentification
- * (et non un incident technique).
+ * Exception utilisée pour signaler un échec fonctionnel de l'authentification (et non un incident technique).
  * 
  * @author edegenetais
  */
