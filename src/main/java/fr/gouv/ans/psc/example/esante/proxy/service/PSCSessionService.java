@@ -116,9 +116,8 @@ public class PSCSessionService {
             accessToken.getType().getValue(),
             idToken.getParsedString(),
             accessToken.toJSONObject().getAsString("scope"),
-            successResponse.toJSONObject().getAsString("session_state"),
-            null,
-            null);
+            successResponse.toJSONObject().getAsString("session_state")
+        );
       } else {
         throw new AuthenticationFailure(tokenResponse.toErrorResponse());
       }

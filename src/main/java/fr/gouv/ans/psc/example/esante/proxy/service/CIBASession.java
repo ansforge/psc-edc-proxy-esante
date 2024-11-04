@@ -18,15 +18,5 @@ public record CIBASession(
     @JsonProperty("token_type") String tokenType,
     @JsonProperty("id_token") String idToken,
     @JsonProperty("scope") String scope,
-    @JsonProperty("session_state") String sessionState,
-    @JsonProperty("error") String error,
-    @JsonProperty("error_description") String errorDescription
-) {
-  public boolean isPending() {
-    return "authorization_pending".equals(error);
-  }
-  
-  public boolean isSuccess() {
-    return error==null;
-  }
-}
+    @JsonProperty("session_state") String sessionState
+) {}
