@@ -111,6 +111,7 @@ public class SessionTests {
                         .queryParam("nationalId", ID_NAT)
                         .queryParam("bindingMessage", "00")
                         .queryParam("clientId", TEST_CLIENT_ID)
+                        .queryParam("channel", "CARD")
                         .build())
             .exchange()
             .expectStatus()
@@ -133,6 +134,7 @@ public class SessionTests {
             .queryParam("nationalId", ID_NAT)
             .queryParam("bindingMessage", "00")
             .queryParam("clientId", TEST_CLIENT_ID)
+            .queryParam("channel", "CARD")
             .build())
       .exchange()
         .expectStatus().isOk();
@@ -155,6 +157,7 @@ public class SessionTests {
             .queryParam("nationalId", ID_NAT)
             .queryParam("bindingMessage", "00")
             .queryParam("clientId", TEST_CLIENT_ID)
+            .queryParam("channel", "CARD")
             .build())
       .exchange()
         .expectStatus().isOk();
@@ -184,6 +187,7 @@ public class SessionTests {
                         .queryParam("nationalId", ID_NAT)
                         .queryParam("bindingMessage", "00")
                         .queryParam("clientId", "client-with-cert")
+                        .queryParam("channel", "CARD")
                         .build())
             .exchange()
             .expectStatus()
