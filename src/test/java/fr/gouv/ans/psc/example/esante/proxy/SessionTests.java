@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import org.apache.commons.io.IOUtils;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseCookie;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriBuilder;
 
 /**
@@ -103,7 +107,7 @@ public class SessionTests {
   @Test
   public void passingConnectQueryReturnsSession() throws ParseException {
     String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
-    Session session =
+    EntityExchangeResult<Session> result =
         testClient
             .get()
             .uri((UriBuilder b) ->
@@ -117,12 +121,16 @@ public class SessionTests {
             .expectStatus()
             .isOk()
             .expectBody(Session.class)
-            .returnResult()
-            .getResponseBody();
+            .returnResult();
+    Session session = result.getResponseBody();
     
     Assertions.assertNotNull(session);
     Assertions.assertFalse(session.proxySessionId().isBlank(), "Session Id must no be empty.");
     Assertions.assertEquals(expectedSessionState,session.sessionState());
+    final ResponseCookie sessionIdCookie = result.getResponseCookies().getFirst("proxy_session_id");
+    Assertions.assertNotNull(sessionIdCookie,"SessionIdCookie must exist.");
+    String sessionIdFromCookie = sessionIdCookie.getValue();
+    Assertions.assertEquals(sessionIdFromCookie, session.proxySessionId(),"Session object id and \"proxy_session_id\" value should match.");
   }
   
   @Test
