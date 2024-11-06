@@ -56,7 +56,8 @@ public class SessionController {
   public Mono<Void> disconnect(WebSession webSession) {
     if(webSession==null || !webSession.isStarted()) {
       return Mono.error(new NotFoundException("No session"));
+    } else {
+      return webSession.invalidate();
     }
-    return Mono.empty();
   }
 }
