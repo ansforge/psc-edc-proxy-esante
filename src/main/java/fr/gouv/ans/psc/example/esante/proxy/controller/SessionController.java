@@ -44,8 +44,8 @@ public class SessionController {
     Callable<Session> sessionSupplier =
         () -> {
           String sessionId = webSession.getId();
-          webSession.start();
           CIBASession session = this.cibaService.cibaAuthentication(bindingMessage,nationalId,clientId, channel);
+          webSession.start();
           return new Session(sessionId, session.sessionState());
         };
 
