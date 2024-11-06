@@ -14,6 +14,7 @@ import org.springframework.web.server.session.CookieWebSessionIdResolver;
 import org.springframework.web.server.session.WebSessionIdResolver;
 
 /**
+ * Configuration de la gestion de session du proxy.
  * @author edegenetais
  */
 @Configuration
