@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import org.apache.commons.io.IOUtils;
-import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.server.WebSession;
 import org.springframework.web.util.UriBuilder;
 
 /**
