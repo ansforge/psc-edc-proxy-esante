@@ -9,14 +9,12 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
-import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
-import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.ciba.AuthRequestID;
 import com.nimbusds.oauth2.sdk.ciba.CIBAGrant;
 import com.nimbusds.oauth2.sdk.ciba.CIBARequest;
 import com.nimbusds.oauth2.sdk.ciba.CIBARequestAcknowledgement;
 import com.nimbusds.oauth2.sdk.ciba.CIBAResponse;
-import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
@@ -65,8 +63,9 @@ public class PSCSessionService {
 
     final Credential credential = this.cfg.getSecret(clientId);
 
-    final ClientSecretBasic clientAuthentication =
-        new ClientSecretBasic(new ClientID(clientId), new Secret(credential.secret()));
+    LOGGER.debug("Client id {}, found credential for auth type {}",clientId,credential.type());
+
+    final ClientAuthentication clientAuthentication = credential.buildAuth(clientId);
 
     CIBARequest req =
         new CIBARequest.Builder(clientAuthentication, new Scope(PSC_CIBA_SCOPES))
