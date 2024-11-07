@@ -21,6 +21,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseCookie;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.util.UriBuilder;
 
@@ -39,6 +41,7 @@ public class SessionTests {
   private static final String TEST_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJzZXNzaW9uX3N0YXRlIjoic2Vzc2lvbi1zdGF0ZS0yNTYteHh4In0.ut7H8Xpxz-6HobZdhH9UF6o5Hdzuv_hdvur-VhDAf4Y";
   private static final String TEST_ID_TOKEN = TEST_ACCESS_TOKEN;//FIXME later
   private static final String MY_CLIENT_SECRET = "my_client_secret";
+  private static final String SESSION_COOKIE_NAME = "proxy_session_id";
   
   @Autowired 
   private WebTestClient testClient;
@@ -103,7 +106,7 @@ public class SessionTests {
   @Test
   public void passingConnectQueryReturnsSession() throws ParseException {
     String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
-    Session session =
+    EntityExchangeResult<Session> result =
         testClient
             .get()
             .uri((UriBuilder b) ->
@@ -117,12 +120,95 @@ public class SessionTests {
             .expectStatus()
             .isOk()
             .expectBody(Session.class)
-            .returnResult()
-            .getResponseBody();
+            .returnResult();
+    Session session = result.getResponseBody();
     
     Assertions.assertNotNull(session);
     Assertions.assertFalse(session.proxySessionId().isBlank(), "Session Id must no be empty.");
     Assertions.assertEquals(expectedSessionState,session.sessionState());
+    final ResponseCookie sessionIdCookie = result.getResponseCookies().getFirst(SESSION_COOKIE_NAME);
+    Assertions.assertNotNull(sessionIdCookie,"SessionIdCookie must exist.");
+    String sessionIdFromCookie = sessionIdCookie.getValue();
+    Assertions.assertEquals(sessionIdFromCookie, session.proxySessionId(),"Session object id and \"proxy_session_id\" value should match.");
+  }
+  
+  @Test
+  public void callingDisconnectWithNoSessionGives404() {
+    testClient
+        .post()
+        .uri(b -> b.path("/disconnect").build())
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+  
+  @Test
+  public void callingDisconnectWithBogusSessionGives404() {
+    testClient
+        .post()
+        .uri(b -> b.path("/disconnect").build())
+        .cookie(SESSION_COOKIE_NAME, "this_is_bogus")
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+  
+  @Test
+  public void callingDisconnectWithRealSessionGives200() {
+    Session session = testClient
+        .get()
+            .uri((UriBuilder b) ->
+                    b.path("/connect")
+                        .queryParam("nationalId", ID_NAT)
+                        .queryParam("bindingMessage", "00")
+                        .queryParam("clientId", TEST_CLIENT_ID)
+                        .queryParam("channel", "CARD")
+                        .build())
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(Session.class)
+            .returnResult().getResponseBody();
+    testClient
+        .post()
+        .uri(b -> b.path("/disconnect").build())
+        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+  
+  @Test
+  public void callingDisconnectWithDisconnectedRealSessionGives404() {
+    Session session = testClient
+        .get()
+            .uri((UriBuilder b) ->
+                    b.path("/connect")
+                        .queryParam("nationalId", ID_NAT)
+                        .queryParam("bindingMessage", "00")
+                        .queryParam("clientId", TEST_CLIENT_ID)
+                        .queryParam("channel", "CARD")
+                        .build())
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(Session.class)
+            .returnResult().getResponseBody();
+    testClient
+        .post()
+        .uri(b -> b.path("/disconnect").build())
+        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .exchange()
+        .expectStatus()
+        .isOk();
+    
+    testClient
+        .post()
+        .uri(b -> b.path("/disconnect").build())
+        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
   
   @Test
