@@ -3,7 +3,9 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.sendGW;
 
+import fr.gouv.ans.psc.example.esante.proxy.UnauthorizedException;
 import fr.gouv.ans.psc.example.esante.proxy.config.SendGatewayClientConfig;
+import fr.gouv.ans.psc.example.esante.proxy.service.AuthenticationFailure;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.ssl.ApplicationProtocolNegotiator;
 import io.netty.handler.ssl.SslContext;
@@ -12,6 +14,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSessionContext;
@@ -25,6 +28,7 @@ import org.springframework.cloud.gateway.filter.headers.HttpHeadersFilter;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 import reactor.netty.http.client.HttpClient;
 
 /**
@@ -42,6 +46,10 @@ public class SslSwitchRoutingFilter extends NettyRoutingFilter {
   @Override
   protected HttpClient getHttpClient(Route route, ServerWebExchange exchange) {
     try {
+      WebSession session = exchange.getSession().toFuture().get();
+      if(session==null || !session.isStarted()) {
+        throw new UnauthorizedException("Pas de session utilisateur.");
+      }
       HttpClient defaultClient = super.getHttpClient(route, exchange);
       
       SslContextBuilder sslBuilder = SslContextBuilder.forClient();
@@ -95,6 +103,10 @@ public class SslSwitchRoutingFilter extends NettyRoutingFilter {
                     }
                   }));
     } catch (SSLException ex) {
+      throw new RuntimeException(ex);
+    } catch (InterruptedException ex) {
+      throw new RuntimeException(ex);
+    } catch (ExecutionException ex) {
       throw new RuntimeException(ex);
     }
   }
