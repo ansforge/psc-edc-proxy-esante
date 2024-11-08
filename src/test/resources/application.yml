@@ -7,6 +7,11 @@ server:
 spring:
   cloud:
     gateway:
+      httpclient:
+        ssl:
+    # !!! TEST ONLY : bien évidemment, en production ou lors des homologations, il convient d'omettre ce réglage et d'utiliser un truststore 
+    # normal convenablement configuré !
+          useInsecureTrustManager: true
     # Cette configuration de test définit deux Fournisseurs de Service aval
     # pour valider la bonne intégration de spring-gateway.
     # Dans une configuration de production, toutes les routes doivent être définies 
@@ -16,13 +21,13 @@ spring:
       routes:
         # Here we see that no route defines the trace filter => this will not be prone to forgetting them
         - id: backend-1
-          uri: http://localhost:8081/
+          uri: https://localhost:8081/
           predicates:
           - Path=/send/backend-1/{endpoint}
           filters:
           - SetPath=/{endpoint}
         - id: backend-2
-          uri: http://localhost:8082/
+          uri: https://localhost:8082/
           predicates:
           - Path=/send/backend-2/{endpoint}
           filters:
