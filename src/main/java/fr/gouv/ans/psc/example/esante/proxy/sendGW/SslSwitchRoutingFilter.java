@@ -5,7 +5,7 @@ package fr.gouv.ans.psc.example.esante.proxy.sendGW;
 
 import fr.gouv.ans.psc.example.esante.proxy.UnauthorizedException;
 import fr.gouv.ans.psc.example.esante.proxy.config.SendGatewayClientConfig;
-import fr.gouv.ans.psc.example.esante.proxy.service.AuthenticationFailure;
+import fr.gouv.ans.psc.example.esante.proxy.service.TechnicalFailure;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.ssl.ApplicationProtocolNegotiator;
 import io.netty.handler.ssl.SslContext;
@@ -19,6 +19,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSessionContext;
 import javax.net.ssl.X509TrustManager;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ import reactor.netty.http.client.HttpClient;
  */
 @Component
 public class SslSwitchRoutingFilter extends NettyRoutingFilter {
+  private static final Logger LOGGER = LoggerFactory.getLogger(SslSwitchRoutingFilter.class);
+  
   @Autowired
   private SendGatewayClientConfig cfg;
   
@@ -60,54 +63,51 @@ public class SslSwitchRoutingFilter extends NettyRoutingFilter {
       
       final SslContext theCtx=sslBuilder.build();
       
-      return defaultClient.secure(
-          s ->
-              s.sslContext(
-                  new SslContext() {
+      return defaultClient.secure(s ->
+              s.sslContext(new SslContext() {
                     private SslContext ctx = theCtx;
 
                     @Override
                     public boolean isClient() {
-                      LoggerFactory.getLogger(SslSwitchRoutingFilter.class).debug("isClient called from {}",this);
+                      LOGGER.debug("isClient called from {}",this);
                       return ctx.isClient();
                     }
 
                     @Override
                     public List<String> cipherSuites() {
-                      LoggerFactory.getLogger(SslSwitchRoutingFilter.class).debug("cipherSuite called from {}",this);
+                      LOGGER.debug("cipherSuite called from {}",this);
                       return ctx.cipherSuites();
                     }
 
                     @Override
                     public ApplicationProtocolNegotiator applicationProtocolNegotiator() {
-                      LoggerFactory.getLogger(SslSwitchRoutingFilter.class).debug("applicationProtocolNegotiator called from {}",this);
+                      LOGGER.debug("applicationProtocolNegotiator called from {}",this);
                       return ctx.applicationProtocolNegotiator();
                     }
 
                     @Override
                     public SSLEngine newEngine(ByteBufAllocator bba) {
-                      LoggerFactory.getLogger(SslSwitchRoutingFilter.class).debug("newEngine(Bba) called from {}",this);
+                      LOGGER.debug("newEngine(Bba) called from {}",this);
                       return ctx.newEngine(bba);
                     }
 
                     @Override
                     public SSLEngine newEngine(ByteBufAllocator bba, String string, int i) {
-                      LoggerFactory.getLogger(SslSwitchRoutingFilter.class).debug("newEngine(Bba,{},{}) called from {}",string,i,this);
+                      LOGGER.debug("newEngine(Bba,{},{}) called from {}",string,i,this);
                       return ctx.newEngine(bba,string,i);
                     }
 
                     @Override
                     public SSLSessionContext sessionContext() {
-                      LoggerFactory.getLogger(SslSwitchRoutingFilter.class).debug("sessionContext called from {}",this);
+                      LOGGER.debug("sessionContext called from {}",this);
                       return ctx.sessionContext();
                     }
                   }));
-    } catch (SSLException ex) {
-      throw new RuntimeException(ex);
-    } catch (InterruptedException ex) {
-      throw new RuntimeException(ex);
+    } catch (InterruptedException | SSLException ex) {
+      throw new TechnicalFailure("Échec du paramétrage SSL pour la connexion sortante.",ex);
     } catch (ExecutionException ex) {
-      throw new RuntimeException(ex);
+      LOGGER.debug("Contexte complet pour Execution error.",ex);
+      throw new TechnicalFailure("Échec du paramétrage SSL pour la connexion sortante.",ex.getCause());
     }
   }
   
