@@ -5,6 +5,9 @@ package fr.gouv.ans.psc.example.esante.proxy;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
+import fr.gouv.ans.psc.example.esante.proxy.model.Session;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +20,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(classes = {EsanteProxyApplication.class})
 @AutoConfigureWebTestClient
 public class SendEndpointTest extends AbstractProxyIntegrationTest {
+  private String sessionId;
 
+  @BeforeEach
+  public void getSession() {
+    Session session = getSession(testClient);
+    sessionId=session.proxySessionId();
+  }
+  
+  @AfterEach
+  public void killSession(){
+    testClient.delete()
+        .uri(b -> b.path("/disconnect").build())
+        .cookie(SessionTests.SESSION_COOKIE_NAME, sessionId)
+        .exchange();//nothing expected : we just want to send the query
+  }
+  
   @Test
   public void getFromBackendOne() {
     final String reponseBody = "{\"status\": \"OK\"}";
@@ -27,6 +45,7 @@ public class SendEndpointTest extends AbstractProxyIntegrationTest {
     testClient
         .get()
         .uri("/send/backend-1/rsc1")
+        .cookie(SessionTests.SESSION_COOKIE_NAME, sessionId)
         .exchange()
         .expectStatus()
         .isOk()
@@ -45,6 +64,7 @@ public class SendEndpointTest extends AbstractProxyIntegrationTest {
     testClient
         .get()
         .uri("/send/backend-2/rsc2")
+        .cookie(SessionTests.SESSION_COOKIE_NAME, sessionId)
         .exchange()
         .expectStatus()
         .isOk()
