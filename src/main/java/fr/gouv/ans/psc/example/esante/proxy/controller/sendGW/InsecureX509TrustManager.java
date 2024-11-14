@@ -1,7 +1,7 @@
 /*
  * (c) Copyright 2024-2024, Agence du Numérique en Santé (ANS) (https://esante.gouv.fr). All rights reserved.
  */
-package fr.gouv.ans.psc.example.esante.proxy.sendGW;
+package fr.gouv.ans.psc.example.esante.proxy.controller.sendGW;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
