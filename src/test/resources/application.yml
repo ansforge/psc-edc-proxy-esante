@@ -32,6 +32,12 @@ spring:
           - Path=/send/backend-2/{endpoint}
           filters:
           - SetPath=/{endpoint}
+        - id: backend-mTLS
+          uri: https://localhost:8083/
+          predicates:
+          - Path=/send/backend-mTLS/{endpoint}
+          filters:
+          - SetPath=/{endpoint}
 psc:
   discoveryURL: http://localhost:8443/auth/realms/esante-wallet/.well-known/wallet-openid-configuration
   clients:

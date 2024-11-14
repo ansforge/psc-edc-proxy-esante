@@ -4,11 +4,14 @@
 package fr.gouv.ans.psc.example.esante.proxy;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -20,6 +23,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(classes = {EsanteProxyApplication.class})
 @AutoConfigureWebTestClient
 public class SendEndpointTest extends AbstractProxyIntegrationTest {
+  private static final int BACKEND_M_TLS_PORT = 8083;
+  
   private String sessionId;
 
   @BeforeEach
@@ -71,11 +76,29 @@ public class SendEndpointTest extends AbstractProxyIntegrationTest {
     backend1.verify(WireMock.exactly(0), WireMock.anyRequestedFor(UrlPattern.ANY));
   }
 
+  /** Création du mock du backend mTLS à l'usage du cas de test ci-dessous. * */
+  @RegisterExtension
+  protected static WireMockExtension backend3 =
+      WireMockExtension.newInstance()
+          .options(
+              WireMockConfiguration.wireMockConfig()
+                  .httpsPort(BACKEND_M_TLS_PORT)
+                  .dynamicPort())
+          .build();
+
   @Test
   public void useDifferentCertificatesFromDifferentSessions() {
-
+    backend3.stubFor(WireMock.get("/rsc3").willReturn(WireMock.okJson("{\"result\": \"OK\"}")));
     try (SessionScope mTlsOkSessionScope =
         sessionScope("client-with-cert"); ) {
+      testClient
+          .get()
+          .uri("/send/backend-mTLS/rsc3")
+          .cookie(SESSION_COOKIE_NAME, mTlsOkSessionScope.getSessionId())
+          .exchange()
+          .expectStatus()
+          .is2xxSuccessful();
+      
     }
   }
 
