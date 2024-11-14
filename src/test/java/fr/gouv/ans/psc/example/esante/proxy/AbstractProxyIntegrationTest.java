@@ -76,4 +76,27 @@ public class AbstractProxyIntegrationTest {
     testClient.delete().uri(b -> b.path("/disconnect").build()).cookie(SESSION_COOKIE_NAME, sessionId).exchange(); //nothing expected : we just want to send the query
   }
 
+  protected SessionScope sessionScope(String idNat) {
+    return new SessionScope(idNat);
+  }
+
+  protected class SessionScope implements AutoCloseable {
+    private String sessionId = null;
+    
+    public SessionScope(String idNat) {
+      this.sessionId = getSession(testClient,idNat).proxySessionId();
+    }
+
+    @Override
+    public void close() {
+      if (sessionId != null) {
+        killSession(testClient, sessionId);
+      }
+    }
+
+    public String getSessionId() {
+      return sessionId;
+    }
+    
+  }
 }

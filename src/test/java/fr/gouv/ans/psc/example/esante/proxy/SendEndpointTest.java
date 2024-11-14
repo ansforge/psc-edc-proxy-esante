@@ -70,4 +70,13 @@ public class SendEndpointTest extends AbstractProxyIntegrationTest {
 
     backend1.verify(WireMock.exactly(0), WireMock.anyRequestedFor(UrlPattern.ANY));
   }
+
+  @Test
+  public void useDifferentCertificatesFromDifferentSessions() {
+
+    try (SessionScope mTlsOkSessionScope =
+        sessionScope("client-with-cert"); ) {
+    }
+  }
+
 }
