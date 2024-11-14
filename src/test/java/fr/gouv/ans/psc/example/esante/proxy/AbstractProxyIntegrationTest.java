@@ -46,9 +46,14 @@ public class AbstractProxyIntegrationTest {
   protected static final String TEST_ID_TOKEN = TEST_ACCESS_TOKEN; //FIXME later
   protected static final String TEST_CLIENT_ID = "client-id-of-test";
   protected static final String REFRESH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoX2lkIjoibXktYXV0aC1yZXEtaWQtMjU1In0._kXdSg6CSbCGidMzlw2CWoZ37QeSLSg9WyLja1ToBs4";
+  public static final String SESSION_COOKIE_NAME = "proxy_session_id";
 
   public static Session getSession(WebTestClient client) {
-    Session session = client.get().uri((UriBuilder b) -> b.path("/connect").queryParam("nationalId", SessionTests.ID_NAT).queryParam("bindingMessage", "00").queryParam("clientId", SessionTests.TEST_CLIENT_ID).queryParam("channel", "CARD").build()).exchange().expectStatus().isOk().expectBody(Session.class).returnResult().getResponseBody();
+    return getSession(client, ID_NAT);
+  }
+
+  public static Session getSession(WebTestClient client, String idNat) {
+    Session session = client.get().uri((UriBuilder b) -> b.path("/connect").queryParam("nationalId", idNat).queryParam("bindingMessage", "00").queryParam("clientId", SessionTests.TEST_CLIENT_ID).queryParam("channel", "CARD").build()).exchange().expectStatus().isOk().expectBody(Session.class).returnResult().getResponseBody();
     return session;
   }
    
@@ -66,4 +71,9 @@ public class AbstractProxyIntegrationTest {
     pscMock.stubFor(WireMock.post(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/token")).inScenario("Poll once then get token").whenScenarioStateIs(Scenario.STARTED).willSetStateTo("First probe done").willReturn(WireMock.jsonResponse("{\n  \"error\":\"authorization_pending\",\n  \"error_description\":\"The authorization request is still pending as the end-user hasn't yet been authenticated.\"\n}\n", 400)));
     pscMock.stubFor(WireMock.post(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/token")).inScenario("Poll once then get token").whenScenarioStateIs("First probe done").willReturn(WireMock.okJson("{\"access_token\": \"" + SessionTests.TEST_ACCESS_TOKEN + "\",\"expires_in\": 120,\"refresh_token\": \"" + SessionTests.REFRESH_TOKEN + "\",\"refresh_expires_in\": 350,\"token_type\":\"Bearer\",\"id_token\":\"" + SessionTests.TEST_ID_TOKEN + "\",\"scope\": \"openid ciba\", \"session_state\": \"session-state-256-xxx\"}")));
   }
+
+  protected void killSession(final WebTestClient testClient, final String sessionId) {
+    testClient.delete().uri(b -> b.path("/disconnect").build()).cookie(SESSION_COOKIE_NAME, sessionId).exchange(); //nothing expected : we just want to send the query
+  }
+
 }

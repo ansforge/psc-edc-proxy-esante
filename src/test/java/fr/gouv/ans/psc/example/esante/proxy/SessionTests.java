@@ -5,19 +5,11 @@ package fr.gouv.ans.psc.example.esante.proxy;
 
 import com.github.tomakehurst.wiremock.client.BasicCredentials;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.nimbusds.jwt.JWTParser;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.text.ParseException;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +27,6 @@ import org.springframework.web.util.UriBuilder;
 @AutoConfigureWebTestClient(timeout = "PT30S")
 public class SessionTests extends AbstractProxyIntegrationTest {
   private static final String MY_CLIENT_SECRET = "my_client_secret";
-  public static final String SESSION_COOKIE_NAME = "proxy_session_id";
   
   @Autowired 
   private WebTestClient testClient;

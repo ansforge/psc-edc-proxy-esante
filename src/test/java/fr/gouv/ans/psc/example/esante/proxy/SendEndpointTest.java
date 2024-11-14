@@ -29,11 +29,8 @@ public class SendEndpointTest extends AbstractProxyIntegrationTest {
   }
   
   @AfterEach
-  public void killSession(){
-    testClient.delete()
-        .uri(b -> b.path("/disconnect").build())
-        .cookie(SessionTests.SESSION_COOKIE_NAME, sessionId)
-        .exchange();//nothing expected : we just want to send the query
+  public void cleanSession() {
+    killSession(testClient, sessionId);
   }
   
   @Test
@@ -45,7 +42,7 @@ public class SendEndpointTest extends AbstractProxyIntegrationTest {
     testClient
         .get()
         .uri("/send/backend-1/rsc1")
-        .cookie(SessionTests.SESSION_COOKIE_NAME, sessionId)
+        .cookie(SESSION_COOKIE_NAME, sessionId)
         .exchange()
         .expectStatus()
         .isOk()
@@ -64,7 +61,7 @@ public class SendEndpointTest extends AbstractProxyIntegrationTest {
     testClient
         .get()
         .uri("/send/backend-2/rsc2")
-        .cookie(SessionTests.SESSION_COOKIE_NAME, sessionId)
+        .cookie(SESSION_COOKIE_NAME, sessionId)
         .exchange()
         .expectStatus()
         .isOk()
