@@ -49,13 +49,21 @@ public class AbstractProxyIntegrationTest {
   public static final String SESSION_COOKIE_NAME = "proxy_session_id";
 
   public static Session getSession(WebTestClient client) {
-    return getSession(client, ID_NAT);
+    return getSession(client, TEST_CLIENT_ID);
   }
 
-  public static Session getSession(WebTestClient client, String idNat) {
-    Session session = client.get().uri((UriBuilder b) -> b.path("/connect").queryParam("nationalId", idNat).queryParam("bindingMessage", "00").queryParam("clientId", SessionTests.TEST_CLIENT_ID).queryParam("channel", "CARD").build()).exchange().expectStatus().isOk().expectBody(Session.class).returnResult().getResponseBody();
-    return session;
+  public static Session getSession(WebTestClient client, String clientId) {
+    return client.get().uri((UriBuilder b) -> b.path("/connect")
+        .queryParam("nationalId", ID_NAT)
+        .queryParam("bindingMessage", "00")
+        .queryParam("clientId", clientId)
+        .queryParam("channel", "CARD")
+        .build())
+        .exchange()
+        .expectStatus().isOk()
+        .expectBody(Session.class).returnResult().getResponseBody();
   }
+
    
   @Autowired
   protected WebTestClient testClient;
@@ -76,15 +84,15 @@ public class AbstractProxyIntegrationTest {
     testClient.delete().uri(b -> b.path("/disconnect").build()).cookie(SESSION_COOKIE_NAME, sessionId).exchange(); //nothing expected : we just want to send the query
   }
 
-  protected SessionScope sessionScope(String idNat) {
-    return new SessionScope(idNat);
+  protected SessionScope sessionScope(String clientId) {
+    return new SessionScope(clientId);
   }
 
   protected class SessionScope implements AutoCloseable {
     private String sessionId = null;
     
-    public SessionScope(String idNat) {
-      this.sessionId = getSession(testClient,idNat).proxySessionId();
+    public SessionScope(String clientId) {
+      this.sessionId = getSession(testClient,clientId).proxySessionId();
     }
 
     @Override
