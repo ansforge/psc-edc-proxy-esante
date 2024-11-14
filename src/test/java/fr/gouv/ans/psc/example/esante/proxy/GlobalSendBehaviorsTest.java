@@ -28,7 +28,7 @@ import org.springframework.web.util.UriBuilder;
  */
 @SpringBootTest(classes = {EsanteProxyApplication.class})
 @AutoConfigureWebTestClient
-public class GlobalSendBehaviorsTest  extends AbstractProxyIntegrationTest {
+public class GlobalSendBehaviorsTest  extends AbstractAuthenticatedProxyIntegrationTest {
   
   /**
    * Pour ces tests, le comportement exact du bcakend ne nous intéresse pas, 
@@ -52,6 +52,7 @@ public class GlobalSendBehaviorsTest  extends AbstractProxyIntegrationTest {
     testClient
         .get()
         .uri("/send/backend-1/carebear1")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
         .exchange().expectStatus().is2xxSuccessful();
     List<Trace> traces =
         testClient
@@ -85,6 +86,7 @@ public class GlobalSendBehaviorsTest  extends AbstractProxyIntegrationTest {
     testClient
         .post()
         .uri("/send/backend-1/carebear2")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
         .exchange().expectStatus().is2xxSuccessful();
     
     List<Trace> traces =

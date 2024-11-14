@@ -22,22 +22,10 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @SpringBootTest(classes = {EsanteProxyApplication.class})
 @AutoConfigureWebTestClient
-public class SendEndpointTest extends AbstractProxyIntegrationTest {
+public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest {
   private static final int BACKEND_M_TLS_PORT = 8083;
   
-  private String sessionId;
 
-  @BeforeEach
-  public void getSession() {
-    Session session = getSession(testClient);
-    sessionId=session.proxySessionId();
-  }
-  
-  @AfterEach
-  public void cleanSession() {
-    killSession(testClient, sessionId);
-  }
-  
   @Test
   public void getFromBackendOne() {
     final String reponseBody = "{\"status\": \"OK\"}";
