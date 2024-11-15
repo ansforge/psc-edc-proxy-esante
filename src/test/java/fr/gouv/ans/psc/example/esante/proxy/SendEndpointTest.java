@@ -7,9 +7,6 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
-import fr.gouv.ans.psc.example.esante.proxy.model.Session;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -41,11 +38,11 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
         .isOk()
         .expectBody()
         .json(reponseBody);
-    
+
     backend2.verify(WireMock.exactly(0), WireMock.anyRequestedFor(UrlPattern.ANY));
   }
-  
-   @Test
+
+  @Test
   public void getFromBackendTwo() {
     final String reponseBody = "{\"status\": \"OK\"}";
     backend2.stubFor(
@@ -83,6 +80,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
     backend3.stubFor(WireMock.get("/rsc3").willReturn(WireMock.okJson("{\"result\": \"OK\"}")));
     try (SessionScope mTlsOkSessionScope =
         sessionScope("client-with-cert"); ) {
+      
       testClient
           .get()
           .uri("/send/backend-mTLS/rsc3")
