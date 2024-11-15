@@ -90,7 +90,20 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
           .exchange()
           .expectStatus()
           .is2xxSuccessful();
-      
+      //requête reçue
+      backend3.verify(WireMock.exactly(1), WireMock.getRequestedFor(WireMock.urlEqualTo("/rsc3")));
+
+      // Le serveur est volontairement mal configuré pour ce client, pour vérifier que le contexte SSL utilisé est bien celui du client associé à la session.
+      testClient
+          .get()
+          .uri("/send/backend-mTLS/rsc3")
+          .cookie(SESSION_COOKIE_NAME, sessionId)
+          .exchange()
+          .expectStatus()
+          .is5xxServerError();
+
+      //pas de seconde requête
+      backend3.verify(WireMock.exactly(1), WireMock.getRequestedFor(WireMock.urlEqualTo("/rsc3")));
     }
   }
 
