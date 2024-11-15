@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 /**
+ * Contrôleur utilitaire pour aider au déploiment.
  * @author edegenetais
  */
 @RestController

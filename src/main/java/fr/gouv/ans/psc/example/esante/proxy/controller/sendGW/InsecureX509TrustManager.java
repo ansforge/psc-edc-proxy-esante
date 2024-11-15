@@ -10,7 +10,10 @@ import javax.net.ssl.X509TrustManager;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Trust manager non-sécurisé (accepte tout certificat serveur) poour les tests d'intégration HTTPS.
+ * NB : ce composant est conçu pour bloquer le démarrage de l'application packagée car cette configuration 
+ * est bien entendu complètemment inadaptée à une situation de production.
+ * 
  * @author edegenetais
  */
 class InsecureX509TrustManager implements X509TrustManager {

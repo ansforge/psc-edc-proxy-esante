@@ -23,6 +23,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
 /**
+ * Cet objet est utilisé pour porter les identifiants utilisés à la fois pour :
+ * <li> obtenir un jeton ProsanteConnect
+ * <li> obtenir des jetons auprès des services token exchange des backends
+ * <li> fournir les certificats clients demandés pour les backends.
  * @author edegenetais
  */
 public record Credential(CredentialType type, String secret, String file) {
@@ -42,7 +46,17 @@ public record Credential(CredentialType type, String secret, String file) {
     return this.type.keyManagerFactory(this);
   }
   
+  /**
+   * Types d'identifiants poour un client.
+   * 
+   */
   public static enum CredentialType {
+    /**
+     * Ce type d'identifiant a servi aux phases initiales précédant la mise en place de 
+     * l'authentification mTLS pour les clients CIBA, et est utilisé dans les TI pour vérifier le bon fonctionnement du code.
+     * @deprecated : ne pass utiliser en production.
+     */
+    @Deprecated
   SECRET {
     @Override
     public void validate(String secret, String file) {
@@ -58,7 +72,9 @@ public record Credential(CredentialType type, String secret, String file) {
     public KeyManagerFactory keyManagerFactory(Credential credential) {
       return null;
     }
-    
+    /**
+     * Type d'identifiants à utiliser en production pour l'authentification CIBA: certificat client mTLS.
+     */
   }, MTLS {
     @Override
     public void validate(String secret, String file) {
@@ -113,10 +129,28 @@ public record Credential(CredentialType type, String secret, String file) {
 
   };
 
+  /**
+   * Logique de validation des données de configuration.
+   * @param secret secret utilisé.
+   * @param file fichier utilisé.
+   */
   public abstract void validate(String secret, String file);
 
+  /**
+   * Insérer ces données d'identification dans la configuratioon d'authentification de la transaction CIBA.
+   * 
+   * @param clientId
+   * @param credential
+   * @return un descripteur d'authentification CIBA.
+   */
   public abstract ClientAuthentication buildAuth(String clientId, Credential credential);
   
+  /**
+   * Traduire ces identifiants sous forme de keyManagerFactory en vue des requêtes <code>/send</code>.
+   * 
+   * @param credential
+   * @return 
+   */
   public abstract KeyManagerFactory keyManagerFactory(Credential credential);
   
   }

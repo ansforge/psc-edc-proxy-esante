@@ -33,6 +33,9 @@ import org.springframework.web.server.WebSession;
 import reactor.netty.http.client.HttpClient;
 
 /**
+ * Ce composant associe pour chaque session un contexte SSL adapté au sein du proxy (méthode <code>/send</code>).s
+ * Il surcharge le routeur par défaut du spring-gateway@netty pour lui ajouter cette fonctionalité.
+ * 
  * @author edegenetais
  */
 @Component
@@ -49,7 +52,7 @@ public class SslSwitchRoutingFilter extends NettyRoutingFilter {
   @Override
   protected HttpClient getHttpClient(Route route, ServerWebExchange exchange) {
     try {
-      WebSession session = exchange.getSession().toFuture().get();
+      final WebSession session = exchange.getSession().toFuture().get();
       if(session==null || !session.isStarted()) {
         throw new UnauthorizedException("Pas de session utilisateur.");
       }
@@ -69,45 +72,7 @@ public class SslSwitchRoutingFilter extends NettyRoutingFilter {
       final SslContext theCtx = sslBuilder.keyManager(kmf).build();
 
       return defaultClient.secure(s ->
-              s.sslContext(new SslContext() {
-                    private SslContext ctx = theCtx;
-
-                    @Override
-                    public boolean isClient() {
-                      LOGGER.debug("isClient called from {}",this);
-                      return ctx.isClient();
-                    }
-
-                    @Override
-                    public List<String> cipherSuites() {
-                      LOGGER.debug("cipherSuite called from {}",this);
-                      return ctx.cipherSuites();
-                    }
-
-                    @Override
-                    public ApplicationProtocolNegotiator applicationProtocolNegotiator() {
-                      LOGGER.debug("applicationProtocolNegotiator called from {}",this);
-                      return ctx.applicationProtocolNegotiator();
-                    }
-
-                    @Override
-                    public SSLEngine newEngine(ByteBufAllocator bba) {
-                      LOGGER.debug("newEngine(Bba) called from {}",this);
-                      return ctx.newEngine(bba);
-                    }
-
-                    @Override
-                    public SSLEngine newEngine(ByteBufAllocator bba, String string, int i) {
-                      LOGGER.debug("newEngine(Bba,{},{}) called from {}",string,i,this);
-                      return ctx.newEngine(bba,string,i);
-                    }
-
-                    @Override
-                    public SSLSessionContext sessionContext() {
-                      LOGGER.debug("sessionContext called from {}",this);
-                      return ctx.sessionContext();
-                    }
-                  }));
+              s.sslContext(new SslContextSpy(theCtx, session)));
     } catch (InterruptedException | SSLException ex) {
       throw new TechnicalFailure("Échec du paramétrage SSL pour la connexion sortante.",ex);
     } catch (ExecutionException ex) {
@@ -119,6 +84,57 @@ public class SslSwitchRoutingFilter extends NettyRoutingFilter {
   @Override
   public int getOrder() {
     return super.getOrder()-1;
+  }
+
+  /**
+   * Ce delegate wrapper permettra d'ajouter quelques logs traçant l'utilisation du contexte SSL pour une session.
+   */
+  private class SslContextSpy extends SslContext {
+
+    private final SslContext theCtx;
+    private final WebSession session;
+
+    public SslContextSpy(SslContext theCtx, WebSession session) {
+      LOGGER.debug("Création d'un contexte SSL pour la session {}",session.getId());
+      this.theCtx = theCtx;
+      this.session = session;
+    }
+   
+    @Override
+    public boolean isClient() {
+      LOGGER.debug("isClient called from session {}",session.getId());
+      return theCtx.isClient();
+    }
+
+    @Override
+    public List<String> cipherSuites() {
+      LOGGER.debug("cipherSuite called from session {}",session.getId());
+      return theCtx.cipherSuites();
+    }
+
+    @Override
+    public ApplicationProtocolNegotiator applicationProtocolNegotiator() {
+      LOGGER.debug("applicationProtocolNegotiator called from session {}",session.getId());
+      return theCtx.applicationProtocolNegotiator();
+    }
+
+    @Override
+    public SSLEngine newEngine(ByteBufAllocator bba) {
+      LOGGER.debug("newEngine(Bba) called from session {}",session.getId());
+      return theCtx.newEngine(bba);
+    }
+
+    @Override
+    public SSLEngine newEngine(ByteBufAllocator bba, String string, int i) {
+      LOGGER.debug("newEngine(Bba,{},{}) called from session {}",string,i,session.getId());
+      return theCtx.newEngine(bba,string,i);
+    }
+
+    @Override
+    public SSLSessionContext sessionContext() {
+      LOGGER.debug("sessionContext called from session {}",session.getId());
+      return theCtx.sessionContext();
+    }
   }
 
   

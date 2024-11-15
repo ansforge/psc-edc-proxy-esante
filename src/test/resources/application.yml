@@ -32,6 +32,8 @@ spring:
           - Path=/send/backend-2/{endpoint}
           filters:
           - SetPath=/{endpoint}
+# Cet backend demande une authentification mTLS (en prod, ils le feront **tous**) pour les cas de test qui vérifient
+# que le système choisit bien son certificat client sortant en fonction de la session proxy (donc du client PSC entrant).
         - id: backend-mTLS
           uri: https://localhost:8083/
           predicates:
@@ -48,7 +50,7 @@ psc:
     client-id2-of-test: 
       type: SECRET,
       secret: the_other_client_secret
-# MTLS permet d'utiliser des certificats clients (un par client du proxy) pour faire les requêtesCIBA
+# MTLS permet d'utiliser des certificats clients (un par client du proxy) pour faire les requêtes.
     client-with-cert:
       type: MTLS
       secret: CLIENTpass

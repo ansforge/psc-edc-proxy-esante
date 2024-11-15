@@ -4,7 +4,7 @@
 package fr.gouv.ans.psc.example.esante.proxy.service;
 
 /**
- * Contexte d'authneification auprès des services backend.
+ * Contexte d'authentification auprès des services backend.
  * 
  * @author edegenetais
  */

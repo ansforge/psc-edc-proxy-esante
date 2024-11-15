@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * Ce service est reponsable de créer / détruire les essions vers les backends.
  * @author edegenetais
  */
 @Component
