@@ -52,4 +52,4 @@ psc:
     client-with-cert:
       type: MTLS
       secret: CLIENTpass
-      file: src/test/resources/client.poc.roc.p12
+      file: src/test/resources/client.edc.proxy.1.p12
