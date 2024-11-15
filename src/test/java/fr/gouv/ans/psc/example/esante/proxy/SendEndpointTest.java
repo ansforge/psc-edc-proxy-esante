@@ -71,6 +71,10 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
           .options(
               WireMockConfiguration.wireMockConfig()
                   .httpsPort(BACKEND_M_TLS_PORT)
+                  .needClientAuth(true)
+                  .trustStorePath("src/test/resources/truststore.jks")
+                  .trustStorePassword("TSpass")
+                  .trustStoreType("JKS")
                   .dynamicPort())
           .build();
 
