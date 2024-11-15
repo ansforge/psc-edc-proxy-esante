@@ -38,6 +38,10 @@ public record Credential(CredentialType type, String secret, String file) {
     return this.type.buildAuth(clientId, this);
   }
   
+  public KeyManagerFactory buildKeyManagerFactory() {
+    return this.type.keyManagerFactory(this);
+  }
+  
   public static enum CredentialType {
   SECRET {
     @Override
@@ -50,6 +54,11 @@ public record Credential(CredentialType type, String secret, String file) {
       return new ClientSecretBasic(new ClientID(clientId), new Secret(credential.secret));
     }
 
+    @Override
+    public KeyManagerFactory keyManagerFactory(Credential credential) {
+      return null;
+    }
+    
   }, MTLS {
     @Override
     public void validate(String secret, String file) {
@@ -59,36 +68,56 @@ public record Credential(CredentialType type, String secret, String file) {
 
       @Override
       public ClientAuthentication buildAuth(String clientId, Credential credential) {
-        final char[] password = credential.secret.toCharArray();
-        try (InputStream certIs = new FileInputStream(credential.file)) {
-          SSLContext sslCtx = SSLContext.getInstance("TLS");
+        try {
           TrustManagerFactory tf =
               TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
           tf.init((KeyStore) null);
-          KeyStore store = KeyStore.getInstance("pkcs12");
+          
+          KeyManagerFactory kmf = keyManagerFactory(credential);
+          
+          SSLContext sslCtx = SSLContext.getInstance("TLS");
+          sslCtx.init(kmf.getKeyManagers(), tf.getTrustManagers(), null);
+          return new PKITLSClientAuthentication(new ClientID(clientId), sslCtx.getSocketFactory());
+          
+        } catch (
+            KeyManagementException |
+            NoSuchAlgorithmException |
+            KeyStoreException e) {
+          throw new TechnicalFailure("Failed to build mTLS auth for client " + clientId, e);
+        }
+      }
+      
+      @Override
+      public KeyManagerFactory keyManagerFactory(Credential credential) {
 
+        try (InputStream certIs = new FileInputStream(credential.file)) {
+          
+          final char[] password = credential.secret.toCharArray();
+          KeyStore store = KeyStore.getInstance("pkcs12");
           store.load(certIs, password);
           KeyManagerFactory kmf =
               KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
           kmf.init(store, password);
-          sslCtx.init(kmf.getKeyManagers(), tf.getTrustManagers(), null);
-
-          return new PKITLSClientAuthentication(new ClientID(clientId), sslCtx.getSocketFactory());
+          return kmf;
+          
         } catch (
-            KeyManagementException |
             UnrecoverableKeyException |
-            KeyStoreException| 
-            NoSuchAlgorithmException |
-            CertificateException |
+            KeyStoreException         |
+            NoSuchAlgorithmException  |
+            CertificateException      |
             IOException ex) {
           throw new TechnicalFailure("Failed to load certificate " + credential.file, ex);
         }
       }
+
+
   };
 
   public abstract void validate(String secret, String file);
 
   public abstract ClientAuthentication buildAuth(String clientId, Credential credential);
+  
+  public abstract KeyManagerFactory keyManagerFactory(Credential credential);
   
   }
 

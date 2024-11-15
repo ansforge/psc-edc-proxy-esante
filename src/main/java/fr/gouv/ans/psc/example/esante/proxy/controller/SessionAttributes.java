@@ -10,6 +10,6 @@ package fr.gouv.ans.psc.example.esante.proxy.controller;
  */
 public final class SessionAttributes {
 
-  static final String BACKEND_AUTH_ATTR = "backend_auth";
+  public static final String BACKEND_AUTH_ATTR = "backend_auth";
   private SessionAttributes(){}
 }

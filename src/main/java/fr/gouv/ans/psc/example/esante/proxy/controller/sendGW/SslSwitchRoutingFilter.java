@@ -5,6 +5,9 @@ package fr.gouv.ans.psc.example.esante.proxy.controller.sendGW;
 
 import fr.gouv.ans.psc.example.esante.proxy.UnauthorizedException;
 import fr.gouv.ans.psc.example.esante.proxy.config.SendGatewayClientConfig;
+import fr.gouv.ans.psc.example.esante.proxy.controller.SessionAttributes;
+import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
+import fr.gouv.ans.psc.example.esante.proxy.service.Credential;
 import fr.gouv.ans.psc.example.esante.proxy.service.TechnicalFailure;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.ssl.ApplicationProtocolNegotiator;
@@ -12,6 +15,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSessionContext;
@@ -57,8 +61,13 @@ public class SslSwitchRoutingFilter extends NettyRoutingFilter {
           sslBuilder=sslBuilder.trustManager(new InsecureX509TrustManager());
       }
       
-      final SslContext theCtx=sslBuilder.build();
-      
+      BackendAuthentication backendAuthentication = session.getAttribute(SessionAttributes.BACKEND_AUTH_ATTR);
+      final Credential credential = backendAuthentication.credential;
+      KeyManagerFactory kmf = credential
+          .buildKeyManagerFactory();
+      LOGGER.debug("Provided kmf : {} for credential {}",kmf,credential);
+      final SslContext theCtx = sslBuilder.keyManager(kmf).build();
+
       return defaultClient.secure(s ->
               s.sslContext(new SslContext() {
                     private SslContext ctx = theCtx;
