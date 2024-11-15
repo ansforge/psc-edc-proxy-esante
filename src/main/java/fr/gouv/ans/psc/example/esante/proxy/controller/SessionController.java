@@ -5,6 +5,8 @@ package fr.gouv.ans.psc.example.esante.proxy.controller;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
+import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
+import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthenticationService;
 import fr.gouv.ans.psc.example.esante.proxy.service.CIBASession;
 import fr.gouv.ans.psc.example.esante.proxy.service.NotFoundException;
 import fr.gouv.ans.psc.example.esante.proxy.service.PSCSessionService;
@@ -26,10 +28,15 @@ import reactor.core.publisher.Mono;
  */
 @RestController
 public class SessionController {
-  private PSCSessionService cibaService;
+  private final PSCSessionService cibaService;
+  private final BackendAuthenticationService backendAuthService;
   
-  public SessionController(@Autowired PSCSessionService cibaService) {
+  public SessionController(
+      @Autowired PSCSessionService cibaService,
+      @Autowired BackendAuthenticationService backendAuthService
+  ) {
     this.cibaService = cibaService;
+    this.backendAuthService = backendAuthService;
   }
   
   @GetMapping("/connect")
@@ -43,10 +50,15 @@ public class SessionController {
     
     Callable<Session> sessionSupplier =
         () -> {
+          
           String sessionId = webSession.getId();
-          CIBASession session = this.cibaService.cibaAuthentication(bindingMessage,nationalId,clientId, channel);
+          CIBASession cibaSession = this.cibaService.cibaAuthentication(bindingMessage,nationalId,clientId, channel);
+          
+          BackendAuthentication backendAuth = this.backendAuthService.authenticate(cibaSession,clientId);
+          webSession.getAttributes().put(SessionAttributes.BACKEND_AUTH_ATTR, backendAuth);
+          
           webSession.start();
-          return new Session(sessionId, session.sessionState());
+          return new Session(sessionId, cibaSession.sessionState());
         };
 
     return Mono.fromCallable(sessionSupplier);

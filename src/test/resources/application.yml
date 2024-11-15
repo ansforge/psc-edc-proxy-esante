@@ -7,6 +7,11 @@ server:
 spring:
   cloud:
     gateway:
+      httpclient:
+        ssl:
+    # !!! TEST ONLY : bien évidemment, en production ou lors des homologations, il convient d'omettre ce réglage et d'utiliser un truststore 
+    # normal convenablement configuré !
+          useInsecureTrustManager: true
     # Cette configuration de test définit deux Fournisseurs de Service aval
     # pour valider la bonne intégration de spring-gateway.
     # Dans une configuration de production, toutes les routes doivent être définies 
@@ -16,15 +21,23 @@ spring:
       routes:
         # Here we see that no route defines the trace filter => this will not be prone to forgetting them
         - id: backend-1
-          uri: http://localhost:8081/
+          uri: https://localhost:8081/
           predicates:
           - Path=/send/backend-1/{endpoint}
           filters:
           - SetPath=/{endpoint}
         - id: backend-2
-          uri: http://localhost:8082/
+          uri: https://localhost:8082/
           predicates:
           - Path=/send/backend-2/{endpoint}
+          filters:
+          - SetPath=/{endpoint}
+# Cet backend demande une authentification mTLS (en prod, ils le feront **tous**) pour les cas de test qui vérifient
+# que le système choisit bien son certificat client sortant en fonction de la session proxy (donc du client PSC entrant).
+        - id: backend-mTLS
+          uri: https://localhost:8083/
+          predicates:
+          - Path=/send/backend-mTLS/{endpoint}
           filters:
           - SetPath=/{endpoint}
 psc:
@@ -37,8 +50,8 @@ psc:
     client-id2-of-test: 
       type: SECRET
       secret: the_other_client_secret
-# MTLS permet d'utiliser des certificats clients (un par client du proxy) pour faire les requêtesCIBA
+# MTLS permet d'utiliser des certificats clients (un par client du proxy) pour faire les requêtes.
     client-with-cert:
       type: MTLS
       secret: CLIENTpass
-      file: src/test/resources/client.poc.roc.p12
+      file: src/test/resources/client.edc.proxy.1.p12
