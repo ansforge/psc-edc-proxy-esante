@@ -8,12 +8,15 @@ import com.nimbusds.oauth2.sdk.ErrorResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Exception utilisée pour signaler un échec fonctionnel de l'authentification (et non un incident technique).
  * 
  * @author edegenetais
  */
+@ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class AuthenticationFailure extends RuntimeException {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFailure.class);
 
