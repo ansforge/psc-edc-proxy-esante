@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  *
  * @author edegenetais
  */
-@ResponseStatus(HttpStatus.UNAUTHORIZED)
+@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
 public class UnauthorizedException extends RuntimeException {
 
   public UnauthorizedException(String message) {

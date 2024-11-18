@@ -4,12 +4,12 @@
 package fr.gouv.ans.psc.example.esante.proxy.controller;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import fr.gouv.ans.psc.example.esante.proxy.UnauthorizedException;
 import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthenticationService;
 import fr.gouv.ans.psc.example.esante.proxy.service.CIBASession;
-import fr.gouv.ans.psc.example.esante.proxy.service.NotFoundException;
 import fr.gouv.ans.psc.example.esante.proxy.service.PSCSessionService;
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -74,7 +74,7 @@ public class SessionController {
   @DeleteMapping("/disconnect")
   public Mono<Void> disconnect(WebSession webSession) {
     if(webSession==null || !webSession.isStarted()) {
-      return Mono.error(new NotFoundException("No session"));
+      return Mono.error(new UnauthorizedException("Pas de session"));
     } else {
       Callable<Void> sessionDestroyer = () -> {
         Mono<Void> sessionEnd = webSession.invalidate();
