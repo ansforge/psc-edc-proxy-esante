@@ -63,7 +63,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   @Test
   public void callingDisconnectWithNoSessionGives404() {
     testClient
-        .post()
+        .delete()
         .uri(b -> b.path("/disconnect").build())
         .exchange()
         .expectStatus()
@@ -74,7 +74,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   @Test
   public void callingDisconnectWithBogusSessionGives404() {
     testClient
-        .post()
+        .delete()
         .uri(b -> b.path("/disconnect").build())
         .cookie(SESSION_COOKIE_NAME, "this_is_bogus")
         .exchange()
@@ -87,7 +87,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   public void callingDisconnectWithRealSessionGives200() {
     Session session = getSession(testClient);
     testClient
-        .post()
+        .delete()
         .uri(b -> b.path("/disconnect").build())
         .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
         .exchange()
@@ -102,7 +102,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   public void callingDisconnectWithDisconnectedRealSessionGives404() {
     Session session = getSession(testClient);
     testClient
-        .post()
+        .delete()
         .uri(b -> b.path("/disconnect").build())
         .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
         .exchange()
@@ -111,7 +111,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     pscMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
     
     testClient
-        .post()
+        .delete()
         .uri(b -> b.path("/disconnect").build())
         .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
         .exchange()
