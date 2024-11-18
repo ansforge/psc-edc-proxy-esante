@@ -9,6 +9,7 @@ import com.nimbusds.oauth2.sdk.auth.PKITLSClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
@@ -17,7 +18,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Objects;
+import java.util.Optional;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
@@ -46,6 +49,10 @@ public record Credential(CredentialType type, String secret, String file) {
     return this.type.keyManagerFactory(this);
   }
   
+  public Optional<X509Certificate> getClientCert() {
+    return this.type.getClientCert(this);
+  }
+  
   /**
    * Types d'identifiants poour un client.
    * 
@@ -72,6 +79,13 @@ public record Credential(CredentialType type, String secret, String file) {
     public KeyManagerFactory keyManagerFactory(Credential credential) {
       return null;
     }
+
+      @Override
+      public Optional<X509Certificate> getClientCert(Credential credential) {
+        return Optional.empty();
+      }
+    
+    
     /**
      * Type d'identifiants à utiliser en production pour l'authentification CIBA: certificat client mTLS.
      */
@@ -126,7 +140,25 @@ public record Credential(CredentialType type, String secret, String file) {
         }
       }
 
+      @Override
+      public Optional<X509Certificate> getClientCert(Credential credential) {
+        try (InputStream certIs = new FileInputStream(credential.file)) {
 
+          final char[] password = credential.secret.toCharArray();
+          KeyStore store = KeyStore.getInstance("pkcs12");
+          store.load(certIs, password);
+
+          X509Certificate crt =
+              (X509Certificate) store.getCertificate(store.aliases().nextElement());
+          return Optional.of(crt);
+        } catch (
+            KeyStoreException        |
+            NoSuchAlgorithmException |
+            CertificateException     | 
+            IOException ex) {
+          throw new TechnicalFailure("Failed to load certificate " + credential.file, ex);
+        }
+      }
   };
 
   /**
@@ -152,6 +184,8 @@ public record Credential(CredentialType type, String secret, String file) {
    * @return 
    */
   public abstract KeyManagerFactory keyManagerFactory(Credential credential);
+  
+  public abstract Optional<X509Certificate> getClientCert(Credential credential);
   
   }
 

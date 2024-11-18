@@ -68,6 +68,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+    pscMock.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
   }
   
   @Test
@@ -79,6 +80,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+    pscMock.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
   }
   
   @Test
@@ -91,6 +93,8 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .exchange()
         .expectStatus()
         .isOk();
+
+    pscMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
   }
 
   
@@ -104,6 +108,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .exchange()
         .expectStatus()
         .isOk();
+    pscMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
     
     testClient
         .post()
@@ -112,6 +117,8 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+    //Le compte doit rester à 1, AKA le second appel à `/disconnect` n'a pas déclenché d'appel à ProSantéConnect
+    pscMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
   }
   
   @Test

@@ -4,6 +4,9 @@
 package fr.gouv.ans.psc.example.esante.proxy.service;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
 
 /**
  * Cet objet représente la réponse d'une requête de polling de l'enpoint token.
@@ -19,4 +22,12 @@ public record CIBASession(
     @JsonProperty("id_token") String idToken,
     @JsonProperty("scope") String scope,
     @JsonProperty("session_state") String sessionState
-) {}
+) {
+  public JWT idTokenAsJWT() {
+    try {
+      return SignedJWT.parse(this.idToken);
+    } catch (ParseException ex) {
+      throw new TechnicalFailure("Échec d'interprétation du jeton JWT idToken CIBA", ex);
+    }
+  }
+}
