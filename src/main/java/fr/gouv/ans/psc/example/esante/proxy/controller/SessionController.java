@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.WebSession;
@@ -66,7 +66,7 @@ public class SessionController {
     return Mono.fromCallable(sessionSupplier);
   }
 
-  @PostMapping("/disconnect")
+  @DeleteMapping("/disconnect")
   public Mono<Void> disconnect(WebSession webSession) {
     if(webSession==null || !webSession.isStarted()) {
       return Mono.error(new NotFoundException("No session"));
