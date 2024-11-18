@@ -27,7 +27,8 @@ spring:
           filters:
           - SetPath=/{endpoint}
           metadata:
-             token-exchange-endpoint: https://auth.server.api.edc-psc.esante.gouv.fr/realms/signsessiondata/protocol/openid-connect/token
+# URL du fournisseur d'identité de ce backend, auprès duquel sera effectué l'échange du token PSC contre un token popur le backend.
+             token-exchange-endpoint: https://localhost:8084/realms/signsessiondata/protocol/openid-connect/token
         - id: backend-2
           uri: https://localhost:8082/
           predicates:
@@ -35,7 +36,8 @@ spring:
           filters:
           - SetPath=/{endpoint}
           metadata:
-            token-exchange-endpoint: https://auth.server.api.edc-psc.esante.gouv.fr/realms/apipsc2/protocol/openid-connect/token
+# URL du fournisseur d'identité de ce backend, auprès duquel sera effectué l'échange du token PSC contre un token popur le backend.
+            token-exchange-endpoint: https://localhost:8085/realms/signsessiondata/protocol/openid-connect/token
 # Cet backend demande une authentification mTLS (en prod, ils le feront **tous**) pour les cas de test qui vérifient
 # que le système choisit bien son certificat client sortant en fonction de la session proxy (donc du client PSC entrant).
         - id: backend-mTLS
@@ -46,7 +48,7 @@ spring:
           - SetPath=/{endpoint}
           metadata:
 # URL du fournisseur d'identité de ce backend, auprès duquel sera effectué l'échange du token PSC contre un token popur le backend.
-             token-exchange-endpoint: https://auth.server.api.edc-psc.esante.gouv.fr/realms/signsessiondata/protocol/openid-connect/token
+             token-exchange-endpoint: https://localhost:8086/realms/signsessiondata/protocol/openid-connect/token
 psc:
   discoveryURL: http://localhost:8443/auth/realms/esante-wallet/.well-known/wallet-openid-configuration
   audience: proxy-exemple
