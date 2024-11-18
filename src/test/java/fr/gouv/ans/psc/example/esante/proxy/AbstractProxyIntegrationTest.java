@@ -83,10 +83,49 @@ public class AbstractProxyIntegrationTest {
   @BeforeEach
   public void setBasePscMockBehavior() throws IOException {
     discoveryData = IOUtils.resourceToString("/mock_discovery_response.json", Charset.forName("UTF-8"));
-    pscMock.stubFor(WireMock.get(WireMock.urlEqualTo("/auth/realms/esante-wallet/.well-known/wallet-openid-configuration")).willReturn(WireMock.okJson(discoveryData)));
-    pscMock.stubFor(WireMock.post(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth")).willReturn(WireMock.okJson("{\"auth_req_id\": \"" + SessionTests.AUT_REQ_ID + "\", \"expires_in\": 120, \"interval\": 1}")));
-    pscMock.stubFor(WireMock.post(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/token")).inScenario("Poll once then get token").whenScenarioStateIs(Scenario.STARTED).willSetStateTo("First probe done").willReturn(WireMock.jsonResponse("{\n  \"error\":\"authorization_pending\",\n  \"error_description\":\"The authorization request is still pending as the end-user hasn't yet been authenticated.\"\n}\n", 400)));
-    pscMock.stubFor(WireMock.post(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/token")).inScenario("Poll once then get token").whenScenarioStateIs("First probe done").willReturn(WireMock.okJson("{\"access_token\": \"" + SessionTests.TEST_ACCESS_TOKEN + "\",\"expires_in\": 120,\"refresh_token\": \"" + SessionTests.REFRESH_TOKEN + "\",\"refresh_expires_in\": 350,\"token_type\":\"Bearer\",\"id_token\":\"" + SessionTests.TEST_ID_TOKEN + "\",\"scope\": \"openid ciba\", \"session_state\": \"session-state-256-xxx\"}")));
+    pscMock.stubFor(
+        WireMock.get(
+                WireMock.urlEqualTo(
+                    "/auth/realms/esante-wallet/.well-known/wallet-openid-configuration"))
+            .willReturn(WireMock.okJson(discoveryData)));
+
+    pscMock.stubFor(
+        WireMock.post(
+                WireMock.urlEqualTo(
+                    "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
+            .willReturn(
+                WireMock.okJson(
+                    "{\"auth_req_id\": \""
+                        + SessionTests.AUT_REQ_ID
+                        + "\", \"expires_in\": 120, \"interval\": 1}")));
+    pscMock.stubFor(
+        WireMock.post(
+                WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/token"))
+            .inScenario("Poll once then get token")
+            .whenScenarioStateIs(Scenario.STARTED)
+            .willSetStateTo("First probe done")
+            .willReturn(
+                WireMock.jsonResponse(
+                    "{\n  \"error\":\"authorization_pending\",\n  \"error_description\":\"The authorization request is still pending as the end-user hasn't yet been authenticated.\"\n}\n",
+                    400)));
+    pscMock.stubFor(
+        WireMock.post(
+                WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/token"))
+            .inScenario("Poll once then get token")
+            .whenScenarioStateIs("First probe done")
+            .willReturn(
+                WireMock.okJson(
+                    "{\"access_token\": \""
+                        + SessionTests.TEST_ACCESS_TOKEN
+                        + "\",\"expires_in\": 120,\"refresh_token\": \""
+                        + SessionTests.REFRESH_TOKEN
+                        + "\",\"refresh_expires_in\": 350,\"token_type\":\"Bearer\",\"id_token\":\""
+                        + SessionTests.TEST_ID_TOKEN
+                        + "\",\"scope\": \"openid ciba\", \"session_state\": \"session-state-256-xxx\"}")));
+    pscMock.stubFor(
+        WireMock.post(
+                WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout"))
+            .willReturn(WireMock.ok()));
   }
 
   protected void killSession(final WebTestClient testClient, final String sessionId) {
