@@ -7,6 +7,11 @@ server:
 spring:
   cloud:
     gateway:
+      httpclient:
+        ssl:
+    # !!! TEST ONLY : bien évidemment, en production ou lors des homologations, il convient d'omettre ce réglage et d'utiliser un truststore 
+    # normal convenablement configuré !
+          useInsecureTrustManager: true
     # Cette configuration de test définit deux Fournisseurs de Service aval
     # pour valider la bonne intégration de spring-gateway.
     # Dans une configuration de production, toutes les routes doivent être définies 
@@ -16,7 +21,7 @@ spring:
       routes:
         # Ici, nous voyons qu'aucune route ne définit le filtre 'trace' => il est défini globalement par le code, ce qui évite les oublis.
         - id: backend-1
-          uri: http://localhost:8081/
+          uri: https://localhost:8081/
           predicates:
           - Path=/send/backend-1/{endpoint}
           filters:
@@ -24,13 +29,24 @@ spring:
           metadata:
              token-exchange-endpoint: https://auth.server.api.edc-psc.esante.gouv.fr/realms/signsessiondata/protocol/openid-connect/token
         - id: backend-2
-          uri: http://localhost:8082/
+          uri: https://localhost:8082/
           predicates:
           - Path=/send/backend-2/{endpoint}
           filters:
           - SetPath=/{endpoint}
           metadata:
             token-exchange-endpoint: https://auth.server.api.edc-psc.esante.gouv.fr/realms/apipsc2/protocol/openid-connect/token
+# Cet backend demande une authentification mTLS (en prod, ils le feront **tous**) pour les cas de test qui vérifient
+# que le système choisit bien son certificat client sortant en fonction de la session proxy (donc du client PSC entrant).
+        - id: backend-mTLS
+          uri: https://localhost:8083/
+          predicates:
+          - Path=/send/backend-mTLS/{endpoint}
+          filters:
+          - SetPath=/{endpoint}
+          metadata:
+# URL du fournisseur d'identité de ce backend, auprès duquel sera effectué l'échange du token PSC contre un token popur le backend.
+             token-exchange-endpoint: https://auth.server.api.edc-psc.esante.gouv.fr/realms/signsessiondata/protocol/openid-connect/token
 psc:
   discoveryURL: http://localhost:8443/auth/realms/esante-wallet/.well-known/wallet-openid-configuration
   audience: proxy-exemple
@@ -40,10 +56,10 @@ psc:
       secret: my_client_secret
 # SECRET est un mécanisme pour permettre les requêtes CIBA en attendant la mise en place du mTLS ProSantéConnect
     client-id2-of-test: 
-      type: SECRET,
+      type: SECRET
       secret: the_other_client_secret
-# MTLS permet d'utiliser des certificats clients (un par client du proxy) pour faire les requêtesCIBA
+# MTLS permet d'utiliser des certificats clients (un par client du proxy) pour faire les requêtes.
     client-with-cert:
       type: MTLS
       secret: CLIENTpass
-      file: src/test/resources/client.poc.roc.p12
+      file: src/test/resources/client.edc.proxy.1.p12

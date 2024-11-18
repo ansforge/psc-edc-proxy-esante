@@ -8,33 +8,28 @@ import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.PKITLSClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.FingerprintTrustManagerFactoryBuilder;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.netty.http.client.HttpClient;
-import reactor.netty.tcp.SslProvider;
 
 /**
+ * Cet objet est utilisé pour porter les identifiants utilisés à la fois pour :
+ * <li> obtenir un jeton ProsanteConnect
+ * <li> obtenir des jetons auprès des services token exchange des backends
+ * <li> fournir les certificats clients demandés pour les backends.
  * @author edegenetais
  */
 public record Credential(CredentialType type, String secret, String file) {
@@ -50,7 +45,25 @@ public record Credential(CredentialType type, String secret, String file) {
     return this.type.buildAuth(clientId, this);
   }
   
+  public KeyManagerFactory buildKeyManagerFactory() {
+    return this.type.keyManagerFactory(this);
+  }
+  
+  public Optional<X509Certificate> getClientCert() {
+    return this.type.getClientCert(this);
+  }
+  
+  /**
+   * Types d'identifiants poour un client.
+   * 
+   */
   public static enum CredentialType {
+    /**
+     * Ce type d'identifiant a servi aux phases initiales précédant la mise en place de 
+     * l'authentification mTLS pour les clients CIBA, et est utilisé dans les TI pour vérifier le bon fonctionnement du code.
+     * @deprecated : ne pass utiliser en production.
+     */
+    @Deprecated
   SECRET {
     @Override
     public void validate(String secret, String file) {
@@ -63,10 +76,19 @@ public record Credential(CredentialType type, String secret, String file) {
     }
 
     @Override
-    public WebClient.Builder apply(WebClient.Builder builder, String clientId, Credential credential) {
-        return builder.defaultHeaders(h -> h.setBasicAuth(clientId, credential.secret));
+    public KeyManagerFactory keyManagerFactory(Credential credential) {
+      return null;
     }
+
+      @Override
+      public Optional<X509Certificate> getClientCert(Credential credential) {
+        return Optional.empty();
+      }
     
+    
+    /**
+     * Type d'identifiants à utiliser en production pour l'authentification CIBA: certificat client mTLS.
+     */
   }, MTLS {
     @Override
     public void validate(String secret, String file) {
@@ -76,64 +98,95 @@ public record Credential(CredentialType type, String secret, String file) {
 
       @Override
       public ClientAuthentication buildAuth(String clientId, Credential credential) {
-        final char[] password = credential.secret.toCharArray();
-        try (InputStream certIs = new FileInputStream(credential.file)) {
-          SSLContext sslCtx = SSLContext.getInstance("TLS");
+        try {
           TrustManagerFactory tf =
               TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
           tf.init((KeyStore) null);
-          KeyStore store = KeyStore.getInstance("pkcs12");
+          
+          KeyManagerFactory kmf = keyManagerFactory(credential);
+          
+          SSLContext sslCtx = SSLContext.getInstance("TLS");
+          sslCtx.init(kmf.getKeyManagers(), tf.getTrustManagers(), null);
+          return new PKITLSClientAuthentication(new ClientID(clientId), sslCtx.getSocketFactory());
+          
+        } catch (
+            KeyManagementException |
+            NoSuchAlgorithmException |
+            KeyStoreException e) {
+          throw new TechnicalFailure("Failed to build mTLS auth for client " + clientId, e);
+        }
+      }
+      
+      @Override
+      public KeyManagerFactory keyManagerFactory(Credential credential) {
 
+        try (InputStream certIs = new FileInputStream(credential.file)) {
+          
+          final char[] password = credential.secret.toCharArray();
+          KeyStore store = KeyStore.getInstance("pkcs12");
           store.load(certIs, password);
           KeyManagerFactory kmf =
               KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
           kmf.init(store, password);
-          sslCtx.init(kmf.getKeyManagers(), tf.getTrustManagers(), null);
-
-          return new PKITLSClientAuthentication(new ClientID(clientId), sslCtx.getSocketFactory());
+          return kmf;
+          
         } catch (
-            KeyManagementException |
             UnrecoverableKeyException |
-            KeyStoreException| 
-            NoSuchAlgorithmException |
-            CertificateException |
+            KeyStoreException         |
+            NoSuchAlgorithmException  |
+            CertificateException      |
             IOException ex) {
           throw new TechnicalFailure("Failed to load certificate " + credential.file, ex);
         }
       }
 
       @Override
-      public WebClient.Builder apply(
-          WebClient.Builder builder, String clientId, Credential credential) {
-        
-        try (InputStream pkcs12Data = new FileInputStream(credential.file)) {
-          
-          char[] password = credential.secret.toCharArray();
+      public Optional<X509Certificate> getClientCert(Credential credential) {
+        try (InputStream certIs = new FileInputStream(credential.file)) {
+
+          final char[] password = credential.secret.toCharArray();
           KeyStore store = KeyStore.getInstance("pkcs12");
-          store.load(pkcs12Data, password);
-          String alias = store.aliases().nextElement();
-          final PrivateKey key = (PrivateKey) store.getKey(alias, password);
-          final List<X509Certificate> chain = Arrays.asList(store.getCertificateChain(alias)).stream().map(c -> (X509Certificate)c).toList();
-          SslContext ctx = SslContextBuilder.forClient().keyManager(key, chain).build();
-          HttpClient httpClient = HttpClient.create().secure((SslProvider.SslContextSpec s) -> s.sslContext(ctx));
-          builder.clientConnector(new ReactorClientHttpConnector(httpClient));
-          return builder;
-        } catch (UnrecoverableKeyException |
-            CertificateException |
+          store.load(certIs, password);
+
+          X509Certificate crt =
+              (X509Certificate) store.getCertificate(store.aliases().nextElement());
+          return Optional.of(crt);
+        } catch (
+            KeyStoreException        |
             NoSuchAlgorithmException |
-            IOException |
-            KeyStoreException ex) {
-          throw new TechnicalFailure("Failed to load client certificate for " + clientId, ex);
+            CertificateException     | 
+            IOException ex) {
+          throw new TechnicalFailure("Failed to load certificate " + credential.file, ex);
         }
       }
-
   };
 
+  /**
+   * Logique de validation des données de configuration.
+   * @param secret secret utilisé.
+   * @param file fichier utilisé.
+   */
   public abstract void validate(String secret, String file);
 
+  /**
+   * Insérer ces données d'identification dans la configuratioon d'authentification de la transaction CIBA.
+   * 
+   * @param clientId
+   * @param credential
+   * @return un descripteur d'authentification CIBA.
+   */
   public abstract ClientAuthentication buildAuth(String clientId, Credential credential);
   
-  public abstract WebClient.Builder apply(WebClient.Builder builder, String clientId, Credential credential);
+  /**
+   * Traduire ces identifiants sous forme de keyManagerFactory en vue des requêtes <code>/send</code>.
+   * 
+   * @param credential
+   * @return 
+   */
+  public abstract KeyManagerFactory keyManagerFactory(Credential credential);
+  
+  public abstract Optional<X509Certificate> getClientCert(Credential credential);
+  
   }
 
 }
