@@ -16,9 +16,12 @@ import com.nimbusds.oauth2.sdk.ciba.CIBAGrant;
 import com.nimbusds.oauth2.sdk.ciba.CIBARequest;
 import com.nimbusds.oauth2.sdk.ciba.CIBARequestAcknowledgement;
 import com.nimbusds.oauth2.sdk.ciba.CIBAResponse;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
+import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
@@ -28,8 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -106,6 +111,7 @@ public class PSCSessionService {
         JWT idToken = successResponse.getOIDCTokens().getIDToken();
         BearerAccessToken accessToken = successResponse.getOIDCTokens().getBearerAccessToken();
         RefreshToken refreshToken = successResponse.getOIDCTokens().getRefreshToken();
+        
         LOGGER.debug("refreshToken : {}", refreshToken.toJSONString());
         LOGGER.debug("accessToken : {}", accessToken.toJSONString());
         return new CIBASession(
@@ -133,6 +139,28 @@ public class PSCSessionService {
       return OIDCProviderMetadata.parse(pscConfigData);
     } catch (ParseException | IOException e) {
       throw new TechnicalFailure("Échec lors du chargement des metadonnées PSC", e);
+    }
+  }
+  
+  public void logout(CIBASession session, String clientId) {
+    try {
+      URI logoutUri = getMetadata().getEndSessionEndpointURI();
+      JWT idTokenHint = session.idTokenAsJWT();
+      
+      LogoutRequest logoutReq = new LogoutRequest(logoutUri, idTokenHint);
+      Credential crd = cfg.getSecret(clientId);
+      HTTPRequest httpRequest = logoutReq.toHTTPRequest();
+      final Optional<X509Certificate> clientCert = crd.getClientCert();
+      if(clientCert.isPresent()) {
+        httpRequest.setClientX509Certificate(clientCert.get());
+      }
+      HTTPResponse response =  httpRequest.send();
+      if (!response.indicatesSuccess()) {
+        LOGGER.warn("Failed to logout from ProSantéConnect, {} : {}",response.getStatusCode(), response.getBody());
+      }
+
+    } catch (IOException ex) {
+      throw new TechnicalFailure("Failed to lgout from PSC", ex);
     }
   }
 }
