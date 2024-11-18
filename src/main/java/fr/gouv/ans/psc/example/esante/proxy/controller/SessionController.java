@@ -4,6 +4,7 @@
 package fr.gouv.ans.psc.example.esante.proxy.controller;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthenticationService;
@@ -16,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.WebSession;
@@ -38,23 +40,27 @@ public class SessionController {
     this.cibaService = cibaService;
     this.backendAuthService = backendAuthService;
   }
-  
-  @GetMapping("/connect")
-  public Mono<Session> connect(
-      @RequestParam("nationalId") String nationalId, 
-      @RequestParam("bindingMessage") String bindingMessage,
-      @RequestParam("clientId") String clientId,
-      @RequestParam("channel") String channel,
-      WebSession webSession
-      ) throws IOException, ParseException, InterruptedException, ExecutionException, java.text.ParseException{
-    
+
+  @PostMapping("/connect")
+  public Mono<Session> connect(@RequestBody Connection connection, WebSession webSession)
+      throws IOException,
+          ParseException,
+          InterruptedException,
+          ExecutionException,
+          java.text.ParseException {
+
     Callable<Session> sessionSupplier =
         () -> {
           
           String sessionId = webSession.getId();
-          CIBASession cibaSession = this.cibaService.cibaAuthentication(bindingMessage,nationalId,clientId, channel);
+          CIBASession cibaSession = this.cibaService.cibaAuthentication(
+              connection.bindingMessage(),
+              connection.nationalId(),
+              connection.clientId(), 
+              connection.channel()
+          );
           
-          BackendAuthentication backendAuth = this.backendAuthService.authenticate(cibaSession,clientId);
+          BackendAuthentication backendAuth = this.backendAuthService.authenticate(cibaSession,connection.clientId());
           webSession.getAttributes().put(SessionAttributes.BACKEND_AUTH_ATTR, backendAuth);
           
           webSession.start();
