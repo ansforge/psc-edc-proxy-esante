@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
+import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -14,8 +15,10 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.util.UriBuilder;
+import reactor.core.publisher.Mono;
 
 /**
  * This class defines Integration tests base configuration.
@@ -53,12 +56,18 @@ public class AbstractProxyIntegrationTest {
   }
 
   public static Session getSession(WebTestClient client, String clientId) {
-    return client.get().uri((UriBuilder b) -> b.path("/connect")
-        .queryParam("nationalId", ID_NAT)
-        .queryParam("bindingMessage", "00")
-        .queryParam("clientId", clientId)
-        .queryParam("channel", "CARD")
-        .build())
+    return client
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+            Mono.just(
+                new Connection(
+            ID_NAT,
+            "00",
+            clientId,
+            "CARD")),
+            Connection.class)
         .exchange()
         .expectStatus().isOk()
         .expectBody(Session.class).returnResult().getResponseBody();

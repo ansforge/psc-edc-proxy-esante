@@ -6,6 +6,7 @@ package fr.gouv.ans.psc.example.esante.proxy;
 import com.github.tomakehurst.wiremock.client.BasicCredentials;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.nimbusds.jwt.JWTParser;
+import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import java.text.ParseException;
 import org.junit.jupiter.api.Assertions;
@@ -13,10 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.util.UriBuilder;
+import reactor.core.publisher.Mono;
 
 /**
  * Cette suite de test valide les bonnes interactions avec ProSanteConnect.
@@ -36,14 +39,18 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
     EntityExchangeResult<Session> result =
         testClient
-            .get()
-            .uri((UriBuilder b) ->
-                    b.path("/connect")
-                        .queryParam("nationalId", ID_NAT)
-                        .queryParam("bindingMessage", "00")
-                        .queryParam("clientId", TEST_CLIENT_ID)
-                        .queryParam("channel", "CARD")
-                        .build())
+            .post()
+            .uri((UriBuilder b) -> b.path("/connect").build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                  Mono.just(
+                      new Connection(
+                          ID_NAT,
+                          "00", 
+                          TEST_CLIENT_ID, 
+                          "CARD")),
+                  Connection.class
+            )
             .exchange()
             .expectStatus()
             .isOk()
@@ -117,14 +124,18 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   @Test
   public void passingConnectQueryCallsAuthEndpoint() {
     testClient
-      .get()
-      .uri((UriBuilder b) ->
-          b.path("/connect")
-            .queryParam("nationalId", ID_NAT)
-            .queryParam("bindingMessage", "00")
-            .queryParam("clientId", TEST_CLIENT_ID)
-            .queryParam("channel", "CARD")
-            .build())
+      .post()
+      .uri((UriBuilder b) -> b.path("/connect").build())
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(
+            Mono.just(
+                new Connection(
+                    ID_NAT,
+                    "00", 
+                    TEST_CLIENT_ID, 
+                    "CARD")),
+            Connection.class
+      )
       .exchange()
         .expectStatus().isOk();
     
@@ -140,14 +151,18 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   @Test
   public void secretClientCredsGiveBasic() {
     testClient
-      .get()
-      .uri((UriBuilder b) ->
-          b.path("/connect")
-            .queryParam("nationalId", ID_NAT)
-            .queryParam("bindingMessage", "00")
-            .queryParam("clientId", TEST_CLIENT_ID)
-            .queryParam("channel", "CARD")
-            .build())
+      .post()
+      .uri((UriBuilder b) -> b.path("/connect").build())
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(
+            Mono.just(
+                new Connection(
+                    ID_NAT,
+                    "00", 
+                    TEST_CLIENT_ID, 
+                    "CARD")),
+            Connection.class
+      )
       .exchange()
         .expectStatus().isOk();
 
@@ -170,14 +185,19 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
     Session session =
         testClient
-            .get()
-            .uri((UriBuilder b) ->
-                    b.path("/connect")
-                        .queryParam("nationalId", ID_NAT)
-                        .queryParam("bindingMessage", "00")
-                        .queryParam("clientId", "client-with-cert")
-                        .queryParam("channel", "CARD")
-                        .build())
+            .post()
+            .uri((UriBuilder b) -> b.path("/connect").build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                Mono.just(
+                    new Connection(
+                        ID_NAT, 
+                        "00", 
+                        "client-with-cert", 
+                        "CARD")
+                ),
+                Connection.class
+            )
             .exchange()
             .expectStatus()
             .isOk()
