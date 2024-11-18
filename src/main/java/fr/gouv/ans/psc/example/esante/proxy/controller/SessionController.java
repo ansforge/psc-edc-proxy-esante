@@ -52,7 +52,9 @@ public class SessionController {
         () -> {
           
           String sessionId = webSession.getId();
+          webSession.getAttributes().put(SessionAttributes.CLIENT_ID, clientId);
           CIBASession cibaSession = this.cibaService.cibaAuthentication(bindingMessage,nationalId,clientId, channel);
+          webSession.getAttributes().put(SessionAttributes.CIBA_SESSION, cibaSession);
           
           BackendAuthentication backendAuth = this.backendAuthService.authenticate(cibaSession,clientId);
           webSession.getAttributes().put(SessionAttributes.BACKEND_AUTH_ATTR, backendAuth);
@@ -69,7 +71,15 @@ public class SessionController {
     if(webSession==null || !webSession.isStarted()) {
       return Mono.error(new NotFoundException("No session"));
     } else {
-      return webSession.invalidate();
+      Callable<Void> sessionDestroyer = () -> {
+        Mono<Void> sessionEnd = webSession.invalidate();
+        String clientId = webSession.getAttribute(SessionAttributes.CLIENT_ID);
+        CIBASession cibaSession = webSession.getAttribute(SessionAttributes.CIBA_SESSION);
+      
+        this.cibaService.logout(cibaSession, clientId);
+        return sessionEnd.block();
+      };
+      return Mono.fromCallable(sessionDestroyer);
     }
   }
 }
