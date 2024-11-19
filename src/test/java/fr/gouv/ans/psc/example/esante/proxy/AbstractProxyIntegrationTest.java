@@ -40,6 +40,7 @@ public class AbstractProxyIntegrationTest {
   protected static final int BACKEND_2_PORT = 8082;
   protected static final int BACKEND_2_IDP_PORT = 8085;
   protected static final int BACKEND_3_IDP_PORT = 8086;
+  protected static final String TOKEN_EXCHANGE_URI = "/realms/signsessiondata/protocol/openid-connect/token";
   
   @RegisterExtension
   protected static WireMockExtension backend1 = WireMockExtension.newInstance()
@@ -129,7 +130,7 @@ public class AbstractProxyIntegrationTest {
                     400)));
     pscMock.stubFor(
         WireMock.post(
-                WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/token"))
+                "/auth/realms/esante-wallet/protocol/openid-connect/token")
             .inScenario("Poll once then get token")
             .whenScenarioStateIs("First probe done")
             .willReturn(
@@ -149,9 +150,7 @@ public class AbstractProxyIntegrationTest {
 
   @BeforeEach
   public void setBackendIDPBehavior() {
-    List.of(backend1IDP,backend2IDP,backend3IDP).forEach(
-        idp -> idp.stubFor(
-        WireMock.post("/realms/signsessiondata/protocol/openid-connect/token")
+    List.of(backend1IDP,backend2IDP,backend3IDP).forEach(idp -> idp.stubFor(WireMock.post(TOKEN_EXCHANGE_URI)
             .willReturn(WireMock.okJson(
 """
 {
