@@ -38,19 +38,23 @@ spring:
     # Le second élément du path définit le service cible, et la suite l'endpoint visé.
     # /send/<nom symbolique service aval>/<endpoint>
       routes:
-        # Here we see that no route defines the trace filter => this will not be prone to forgetting them
+        # Ici, nous voyons qu'aucune route ne définit le filtre 'trace' => il est défini globalement par le code, ce qui évite les oublis.
         - id: backend-1
           uri: https://localhost:8081/
           predicates:
           - Path=/send/backend-1/{endpoint}
           filters:
           - SetPath=/{endpoint}
+          metadata:
+             token-exchange-endpoint: https://auth.server.api.edc-psc.esante.gouv.fr/realms/signsessiondata/protocol/openid-connect/token
         - id: backend-2
           uri: https://localhost:8082/
           predicates:
           - Path=/send/backend-2/{endpoint}
           filters:
           - SetPath=/{endpoint}
+          metadata:
+            token-exchange-endpoint: https://auth.server.api.edc-psc.esante.gouv.fr/realms/apipsc2/protocol/openid-connect/token
 # Cet backend demande une authentification mTLS (en prod, ils le feront **tous**) pour les cas de test qui vérifient
 # que le système choisit bien son certificat client sortant en fonction de la session proxy (donc du client PSC entrant).
         - id: backend-mTLS
@@ -59,8 +63,12 @@ spring:
           - Path=/send/backend-mTLS/{endpoint}
           filters:
           - SetPath=/{endpoint}
+          metadata:
+# URL du fournisseur d'identité de ce backend, auprès duquel sera effectué l'échange du token PSC contre un token popur le backend.
+             token-exchange-endpoint: https://auth.server.api.edc-psc.esante.gouv.fr/realms/signsessiondata/protocol/openid-connect/token
 psc:
   discoveryURL: http://localhost:8443/auth/realms/esante-wallet/.well-known/wallet-openid-configuration
+  audience: proxy-exemple
   clients:
     client-id-of-test:
       type: SECRET
