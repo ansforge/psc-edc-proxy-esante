@@ -27,16 +27,16 @@ import reactor.core.publisher.Mono;
  */
 public class AbstractProxyIntegrationTest {
 
-  protected static final int BAKCEND_1_PORT = 8081;
-  protected static final int BAKCEND_2_PORT = 8082;
+  protected static final int BACKEND_1_PORT = 8081;
+  protected static final int BACKEND_2_PORT = 8082;
   
   @RegisterExtension
   protected static WireMockExtension backend1 = WireMockExtension.newInstance()
-      .options(WireMockConfiguration.wireMockConfig().httpsPort(BAKCEND_1_PORT).dynamicPort())
+      .options(WireMockConfiguration.wireMockConfig().httpsPort(BACKEND_1_PORT).dynamicPort())
       .build();
   @RegisterExtension
   protected static WireMockExtension backend2 = WireMockExtension.newInstance()
-      .options(WireMockConfiguration.wireMockConfig().httpsPort(BAKCEND_2_PORT).dynamicPort())
+      .options(WireMockConfiguration.wireMockConfig().httpsPort(BACKEND_2_PORT).dynamicPort())
       .build();
    @RegisterExtension
   protected static WireMockExtension pscMock =
