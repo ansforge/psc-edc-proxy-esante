@@ -33,6 +33,7 @@ public class AbstractProxyIntegrationTest {
   protected static final String TEST_ID_TOKEN = TEST_ACCESS_TOKEN; //FIXME later
   protected static final String TEST_CLIENT_ID = "client-id-of-test";
   protected static final String REFRESH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoX2lkIjoibXktYXV0aC1yZXEtaWQtMjU1In0._kXdSg6CSbCGidMzlw2CWoZ37QeSLSg9WyLja1ToBs4";
+  protected static final String SESSION_COOKIE_NAME = "proxy_session_id";
   protected static final int BACKEND_1_PORT = 8081;
   protected static final int BACKEND_2_PORT = 8082;
   
@@ -49,7 +50,6 @@ public class AbstractProxyIntegrationTest {
       WireMockExtension.newInstance()
           .options(WireMockConfiguration.wireMockConfig().port(8443))
           .build();
-  public static final String SESSION_COOKIE_NAME = "proxy_session_id";
 
   public static Session getSession(WebTestClient client) {
     return getSession(client, TEST_CLIENT_ID);
