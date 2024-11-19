@@ -35,16 +35,28 @@ public class AbstractProxyIntegrationTest {
   protected static final String REFRESH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoX2lkIjoibXktYXV0aC1yZXEtaWQtMjU1In0._kXdSg6CSbCGidMzlw2CWoZ37QeSLSg9WyLja1ToBs4";
   protected static final String SESSION_COOKIE_NAME = "proxy_session_id";
   protected static final int BACKEND_1_PORT = 8081;
+  protected static final int BACKEND_1_IDP_PORT = 8084;
   protected static final int BACKEND_2_PORT = 8082;
+  protected static final int BACKEND_2_IDP_PORT = 8085;
   
   @RegisterExtension
   protected static WireMockExtension backend1 = WireMockExtension.newInstance()
       .options(WireMockConfiguration.wireMockConfig().httpsPort(BACKEND_1_PORT).dynamicPort())
       .build();
   @RegisterExtension
+  protected static WireMockExtension backend1IDP = WireMockExtension.newInstance()
+      .options(WireMockConfiguration.wireMockConfig().port(BACKEND_1_IDP_PORT).dynamicHttpsPort())
+      .build();
+  
+  @RegisterExtension
   protected static WireMockExtension backend2 = WireMockExtension.newInstance()
       .options(WireMockConfiguration.wireMockConfig().httpsPort(BACKEND_2_PORT).dynamicPort())
       .build();
+  @RegisterExtension
+  protected static WireMockExtension backend2IDP = WireMockExtension.newInstance()
+      .options(WireMockConfiguration.wireMockConfig().port(BACKEND_2_IDP_PORT).dynamicHttpsPort())
+      .build();
+  
    @RegisterExtension
   protected static WireMockExtension pscMock =
       WireMockExtension.newInstance()
