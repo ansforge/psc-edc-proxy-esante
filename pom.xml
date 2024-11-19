@@ -28,7 +28,7 @@
       parce que WireMock 9.3.1 n'est pas encore complètement compatible avec Jetty 12
       et nous ne l'utilisons pas dans le code applicatif.
     -->
-    <jetty.component.version>11.0.24</jetty.component.version>
+    <jetty.component.version>12.0.12</jetty.component.version>
   </properties>
   <dependencyManagement>
     <dependencies>
