@@ -143,11 +143,11 @@ public class PSCSessionService {
             successResponse.toJSONObject().getAsString("session_state")
         );
       } else {
-        LOGGER.error("Authentication failed : {}",tokenResponse.toErrorResponse());
+        LOGGER.error("Authentication failed : {}",tokenResponse.toErrorResponse().toJSONObject());
         throw new AuthenticationFailure(tokenResponse.toErrorResponse());
       }
     } else {
-      LOGGER.error("Authentication failed : {}",response.toErrorResponse());
+      LOGGER.error("Authentication failed : {}",response.toErrorResponse().toJSONObject());
       throw new AuthenticationFailure(response.toErrorResponse());
     }
   }
