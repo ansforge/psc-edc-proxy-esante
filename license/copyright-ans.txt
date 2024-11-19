@@ -1,1 +1,0 @@
-(c) Copyright ${year}, ${owner} (${email}). All rights reserved.
