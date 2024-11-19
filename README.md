@@ -36,6 +36,14 @@
 	
 1.  Vérifier puis committer les changements
 
+## Construction de l'image docker
+
+Exécuter la commande suivante à la racine du projet:
+
+```bash
+docker build . -t ans.gouv.fr/psc-edc-proxy-esante
+```
+
 # Exécution
 
 ## En ligne de commande
@@ -51,4 +59,19 @@ Lancer la ligne de commande ci-dessous, où <LEVEL> peut être :
 
 ```bash
 java java -Dlogging.level.fr.gouv.ans=<LEVEL> spring.config.location=/home/ericdegenetais/ciphered_data/missions/ANS/outil_homologation_proxy_CIBA/ -jar psc-esante-proxy-example-0.0.1-SNAPSHOT.jar
+```
+
+## En déployant l'image docker
+
+Pour déployer le proxy sous forme de container Docker, il faut lui fournir un fichier de configuration monté
+sur le chemin `/usr/app/config/application.yml`.
+
+```bash
+docker run -v /host/path/to/configuration/application.yml:/usr/app/config/application.yml ans.gouv.fr/psc-edc-proxy-esante
+```
+
+Les logs de debug du code applicatif peuvent être activés en définissant la variable LOG_LEVEL avec la valeur `DEBUG`
+
+```bash
+docker run -e LOG_LEVEL=DEBUG -v /host/path/to/configuration/application.yml:/usr/app/config/application.yml ans.gouv.fr/psc-edc-proxy-esante
 ```
