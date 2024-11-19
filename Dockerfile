@@ -31,5 +31,5 @@ FROM eclipse-temurin:21.0.5_11-jdk
 COPY --from=builder /src/target/psc-esante-proxy-example-*.jar /usr/app/psc-esante-proxy-example.jar
 EXPOSE 8080
 USER daemon
-ENV LOG_LEVEL=DEBUG
+ENV LOG_LEVEL=INFO
 ENTRYPOINT ["java","-Dlogging.level.fr.gouv.ans=${LOG_LEVEL}","-Dspring.config.location=/usr/app/config/application.yml","-jar","/usr/app/psc-esante-proxy-example.jar"]
