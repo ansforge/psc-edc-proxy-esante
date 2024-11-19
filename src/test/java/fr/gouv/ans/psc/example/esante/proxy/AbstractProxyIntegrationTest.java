@@ -38,6 +38,7 @@ public class AbstractProxyIntegrationTest {
   protected static final int BACKEND_1_IDP_PORT = 8084;
   protected static final int BACKEND_2_PORT = 8082;
   protected static final int BACKEND_2_IDP_PORT = 8085;
+  protected static final int BACKEND_3_IDP_PORT = 8086;
   
   @RegisterExtension
   protected static WireMockExtension backend1 = WireMockExtension.newInstance()
@@ -55,6 +56,11 @@ public class AbstractProxyIntegrationTest {
   @RegisterExtension
   protected static WireMockExtension backend2IDP = WireMockExtension.newInstance()
       .options(WireMockConfiguration.wireMockConfig().port(BACKEND_2_IDP_PORT).dynamicHttpsPort())
+      .build();
+  
+  @RegisterExtension
+  protected static WireMockExtension backend3IDP = WireMockExtension.newInstance()
+      .options(WireMockConfiguration.wireMockConfig().port(BACKEND_3_IDP_PORT).dynamicHttpsPort())
       .build();
   
    @RegisterExtension
