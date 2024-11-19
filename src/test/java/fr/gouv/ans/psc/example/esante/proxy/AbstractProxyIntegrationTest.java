@@ -27,6 +27,12 @@ import reactor.core.publisher.Mono;
  */
 public class AbstractProxyIntegrationTest {
 
+  protected static final String AUT_REQ_ID = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im15LWF1dGgtcmVxLWlkLTI1NSJ9.zCIf0ngT65O3wXeWsUetWasqAYBNsq1_m-wEUc_QhkQ";
+  protected static final String ID_NAT = "500000001815646/CPAT00045";
+  protected static final String TEST_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJzZXNzaW9uX3N0YXRlIjoic2Vzc2lvbi1zdGF0ZS0yNTYteHh4In0.ut7H8Xpxz-6HobZdhH9UF6o5Hdzuv_hdvur-VhDAf4Y";
+  protected static final String TEST_ID_TOKEN = TEST_ACCESS_TOKEN; //FIXME later
+  protected static final String TEST_CLIENT_ID = "client-id-of-test";
+  protected static final String REFRESH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoX2lkIjoibXktYXV0aC1yZXEtaWQtMjU1In0._kXdSg6CSbCGidMzlw2CWoZ37QeSLSg9WyLja1ToBs4";
   protected static final int BACKEND_1_PORT = 8081;
   protected static final int BACKEND_2_PORT = 8082;
   
@@ -43,12 +49,6 @@ public class AbstractProxyIntegrationTest {
       WireMockExtension.newInstance()
           .options(WireMockConfiguration.wireMockConfig().port(8443))
           .build();
-  protected static final String AUT_REQ_ID = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im15LWF1dGgtcmVxLWlkLTI1NSJ9.zCIf0ngT65O3wXeWsUetWasqAYBNsq1_m-wEUc_QhkQ";
-  protected static final String ID_NAT = "500000001815646/CPAT00045";
-  protected static final String TEST_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJzZXNzaW9uX3N0YXRlIjoic2Vzc2lvbi1zdGF0ZS0yNTYteHh4In0.ut7H8Xpxz-6HobZdhH9UF6o5Hdzuv_hdvur-VhDAf4Y";
-  protected static final String TEST_ID_TOKEN = TEST_ACCESS_TOKEN; //FIXME later
-  protected static final String TEST_CLIENT_ID = "client-id-of-test";
-  protected static final String REFRESH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoX2lkIjoibXktYXV0aC1yZXEtaWQtMjU1In0._kXdSg6CSbCGidMzlw2CWoZ37QeSLSg9WyLja1ToBs4";
   public static final String SESSION_COOKIE_NAME = "proxy_session_id";
 
   public static Session getSession(WebTestClient client) {
