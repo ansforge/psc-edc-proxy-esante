@@ -70,8 +70,22 @@ sur le chemin `/usr/app/config/application.yml`.
 docker run -v /host/path/to/configuration/application.yml:/usr/app/config/application.yml ans.gouv.fr/psc-edc-proxy-esante
 ```
 
+### Débuggage
+
 Les logs de debug du code applicatif peuvent être activés en définissant la variable LOG_LEVEL avec la valeur `DEBUG`
 
 ```bash
 docker run -e LOG_LEVEL=DEBUG -v /host/path/to/configuration/application.yml:/usr/app/config/application.yml ans.gouv.fr/psc-edc-proxy-esante
 ```
+
+### Autorités de certification
+
+Si vous souhaitez ajouter des autorités de certification spécifiques à votre environnement à celles qui
+sont automatiquement reconnues, vous pouvez ajouter les paramètres `-v /path/to/AC/directory:/certificates -e USE_SYSTEM_CA_CERTS=1`
+
+```bash
+docker run -v /path/to/AC/directory:/certificates -e USE_SYSTEM_CA_CERTS=1 -v /host/path/to/configuration/application.yml:/usr/app/config/application.yml ans.gouv.fr/psc-edc-proxy-esante
+```
+
+Le répertoire /path/to/AC/directory doit contenir le ou les certificat(s) 
+au format PEM avec l'extension `.crt`.
