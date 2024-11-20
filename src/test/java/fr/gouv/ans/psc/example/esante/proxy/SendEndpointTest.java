@@ -26,6 +26,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -57,6 +58,39 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
         .isOk()
         .expectBody()
         .json(reponseBody);
+
+    backend2.verify(WireMock.exactly(0), WireMock.anyRequestedFor(UrlPattern.ANY));
+  }
+  
+  @Test
+  public void sendWithoutSessionGives401() {
+    final String reponseBody = "{\"status\": \"OK\"}";
+    backend1.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
+
+    testClient
+        .get()
+        .uri("/send/backend-1/rsc1")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+
+    backend2.verify(WireMock.exactly(0), WireMock.anyRequestedFor(UrlPattern.ANY));
+  }
+  
+  @Test
+  public void sendWithBogusSessionGives401() {
+    final String reponseBody = "{\"status\": \"OK\"}";
+    backend1.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
+
+    testClient
+        .get()
+        .uri("/send/backend-1/rsc1")
+        .cookie(SESSION_COOKIE_NAME, "this_is_bogus")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
 
     backend2.verify(WireMock.exactly(0), WireMock.anyRequestedFor(UrlPattern.ANY));
   }

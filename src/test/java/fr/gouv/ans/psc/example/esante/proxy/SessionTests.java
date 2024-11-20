@@ -87,25 +87,25 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   }
   
   @Test
-  public void callingDisconnectWithNoSessionGives404() {
+  public void callingDisconnectWithNoSessionGives401() {
     testClient
         .delete()
         .uri(b -> b.path("/disconnect").build())
         .exchange()
         .expectStatus()
-        .isNotFound();
+        .isUnauthorized();
     pscMock.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
   }
   
   @Test
-  public void callingDisconnectWithBogusSessionGives404() {
+  public void callingDisconnectWithBogusSessionGives401() {
     testClient
         .delete()
         .uri(b -> b.path("/disconnect").build())
         .cookie(SESSION_COOKIE_NAME, "this_is_bogus")
         .exchange()
         .expectStatus()
-        .isNotFound();
+        .isUnauthorized();
     pscMock.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
   }
   
@@ -125,7 +125,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
 
   
   @Test
-  public void callingDisconnectWithDisconnectedRealSessionGives404() {
+  public void callingDisconnectWithDisconnectedRealSessionGives401() {
     Session session = getSession(testClient);
     testClient
         .delete()
@@ -142,7 +142,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
         .exchange()
         .expectStatus()
-        .isNotFound();
+        .isUnauthorized();
     //Le compte doit rester à 1, AKA le second appel à `/disconnect` n'a pas déclenché d'appel à ProSantéConnect
     pscMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
   }
