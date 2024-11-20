@@ -40,7 +40,7 @@ import org.springframework.web.util.UriBuilder;
  * (aka : nous n'avons pas besoin d'ajouter explicitement le contenu à la configuration).
  *
  * Ceci évitera que de laisser les comportements importants à la merci de la configuration du proxy.
- * Le cobaye choisi est (unde ébauche grossière de) le fonctionnalité de trace. 
+ * Le cobaye choisi est (une ébauche grossière de) la fonctionnalité de trace. 
  * Il en résulte que ce test devra évoluer quand les traces définitives seront développées.
  *
  * @author edegenetais
