@@ -54,6 +54,30 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   private WebTestClient testClient;
 
   @Test
+  public void passingConnectQueryExhangesIDPTokens() {
+    testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+            Mono.just(
+                new Connection(
+                    ID_NAT, 
+                    "00", 
+                    TEST_CLIENT_ID, 
+                    "CARD")),
+            Connection.class
+        )
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    backend1IDP.verify(1,WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
+    backend2IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
+    backend3IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
+  }
+  
+  @Test
   public void passingConnectQueryReturnsSession() throws ParseException {
     String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
     EntityExchangeResult<Session> result =

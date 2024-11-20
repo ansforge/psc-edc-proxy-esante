@@ -20,29 +20,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy.service;
+package fr.gouv.ans.psc.example.esante.proxy.config;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Future;
+import fr.gouv.ans.psc.example.esante.proxy.service.Backend;
+import java.util.List;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Contexte d'authentification auprès des services backend.
- * 
  * @author edegenetais
  */
-public class BackendAuthentication {
-  public final Credential credential;
-  private Map<String,Future<BackendAccess>> backendAccessTokens=new HashMap<>();
-  public BackendAuthentication(Credential credential) {
-    this.credential = credential;
+@ConfigurationProperties("spring.cloud.gateway")
+public class BackendAuthenticationConfig {
+  private List<Backend> routes;
+  public BackendAuthenticationConfig (List<Backend> routes){
+    this.routes = routes;
+    LoggerFactory.getLogger(BackendAuthenticationConfig.class).debug("{} backends définis.",routes.size());
   }
   
-  public Future<BackendAccess> switchFutureBackendToken(String backendId, Future<BackendAccess> tokenFuture) {
-    return this.backendAccessTokens.put(backendId, tokenFuture);
-  }
-  
-  public Future<BackendAccess> findBackendToken(String backendId) {
-    return backendAccessTokens.get(backendId);
+  public List<Backend> routes() {
+    return List.copyOf(routes);
   }
 }

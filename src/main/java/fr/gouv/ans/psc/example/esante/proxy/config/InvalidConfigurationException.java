@@ -20,29 +20,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy.service;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Future;
+package fr.gouv.ans.psc.example.esante.proxy.config;
 
 /**
- * Contexte d'authentification auprès des services backend.
- * 
+ *
  * @author edegenetais
  */
-public class BackendAuthentication {
-  public final Credential credential;
-  private Map<String,Future<BackendAccess>> backendAccessTokens=new HashMap<>();
-  public BackendAuthentication(Credential credential) {
-    this.credential = credential;
+public class InvalidConfigurationException extends RuntimeException{
+
+  public InvalidConfigurationException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public InvalidConfigurationException(String message) {
+    super(message);
   }
   
-  public Future<BackendAccess> switchFutureBackendToken(String backendId, Future<BackendAccess> tokenFuture) {
-    return this.backendAccessTokens.put(backendId, tokenFuture);
-  }
-  
-  public Future<BackendAccess> findBackendToken(String backendId) {
-    return backendAccessTokens.get(backendId);
-  }
 }
