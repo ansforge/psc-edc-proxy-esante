@@ -26,4 +26,8 @@ package fr.gouv.ans.psc.example.esante.proxy.service;
  *
  * @author edegenetais
  */
-public record BackendAccess (String idToken, long validitySeconds, String refreshToken){}
+public record BackendAccess (String idToken, long validitySeconds, String refreshToken){
+  public String authorizationHeader() {
+    return "Bearer "+idToken;
+  }
+}
