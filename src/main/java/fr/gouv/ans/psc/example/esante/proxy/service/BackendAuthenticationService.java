@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 /**
  * Ce service est reponsable de créer / détruire les essions vers les backends.
@@ -59,8 +58,7 @@ public class BackendAuthenticationService {
             b -> {
                   BackendAccess access = tokenExchange.getBackendAccessFromPSC(b);
                   
-                  backendAuthentication.switchFutureBackendToken(
-                      b.id(), Mono.just(access).toFuture());
+                  backendAuthentication.switchFutureBackendToken(b.id(), access);
                   LOGGER.debug("Token registered for {}",b.id());
                   
             });
