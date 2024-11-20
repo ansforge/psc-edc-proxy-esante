@@ -32,4 +32,4 @@ COPY --from=builder /src/target/psc-esante-proxy-example-*.jar /usr/app/psc-esan
 EXPOSE 8080
 USER daemon
 ENV LOG_LEVEL=INFO
-ENTRYPOINT ["java","-Dlogging.level.fr.gouv.ans=${LOG_LEVEL}","-Dspring.config.location=/usr/app/config/application.yml","-jar","/usr/app/psc-esante-proxy-example.jar"]
+CMD ["java","-Dlogging.level.fr.gouv.ans=${LOG_LEVEL}","-Dspring.config.location=/usr/app/config/application.yml","-jar","/usr/app/psc-esante-proxy-example.jar"]
