@@ -1,6 +1,6 @@
 {
     "issuer": "http://localhost:8443/auth/realms/esante-wallet",
-    "authorization_endpoint": "httpss://wallet.bas.psc.esante.gouv.fr/auth",
+    "authorization_endpoint": "https://wallet.bas.psc.esante.gouv.fr/auth",
     "token_endpoint": "http://localhost:8443/auth/realms/esante-wallet/protocol/openid-connect/token",
     "introspection_endpoint": "http://localhost:8443/auth/realms/esante-wallet/protocol/openid-connect/token/introspect",
     "userinfo_endpoint": "http://localhost:8443/auth/realms/esante-wallet/protocol/openid-connect/userinfo",
