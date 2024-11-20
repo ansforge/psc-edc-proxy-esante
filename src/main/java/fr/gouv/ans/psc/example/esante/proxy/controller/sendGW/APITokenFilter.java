@@ -27,6 +27,7 @@ import fr.gouv.ans.psc.example.esante.proxy.controller.SessionAttributes;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAccess;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
 import fr.gouv.ans.psc.example.esante.proxy.service.TechnicalFailure;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -61,8 +62,7 @@ public class APITokenFilter implements GlobalFilter {
       BackendAuthentication backendAuth = session.getAttribute(SessionAttributes.BACKEND_AUTH_ATTR);
       Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
       String backendId = route.getId();
-      // FIX below when adding refresh, the Future may take some time to complete
-      BackendAccess access = backendAuth.findBackendToken(backendId).get();
+      BackendAccess access = backendAuth.findBackendToken(backendId);
       ServerHttpRequest req = exchange.getRequest().mutate().header("Authorization", access.authorizationHeader()).build();
       LoggerFactory.getLogger(APITokenFilter.class).debug("API Token filter applied for backend {}, session {}",backendId,session.getId());
       return chain.filter(exchange.mutate().request(req).build());
