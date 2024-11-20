@@ -71,7 +71,7 @@ public class TokenExchangeProcess {
 
         LOGGER
             .error(
-                "Token exchange for " + b.id() + " failed for client " + clientId,
+                "Token exchange for {} failed for client {}. {}",b.id(),clientId,
                 reponse.toErrorResponse().toJSONObject());
         throw new AuthenticationFailure(reponse.toErrorResponse());
       }
