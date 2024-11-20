@@ -27,7 +27,6 @@ import fr.gouv.ans.psc.example.esante.proxy.controller.SessionAttributes;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAccess;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
 import fr.gouv.ans.psc.example.esante.proxy.service.TechnicalFailure;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
