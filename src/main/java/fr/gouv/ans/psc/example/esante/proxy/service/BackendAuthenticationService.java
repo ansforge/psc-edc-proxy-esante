@@ -64,4 +64,13 @@ public class BackendAuthenticationService {
             });
     return backendAuthentication;
   }
+  
+  public void wipe(BackendAuthentication backendAuth){
+    this.backendCfg
+        .routes()
+        .forEach(b -> {
+            backendAuth.switchBackendToken(b.id(), null);
+            LOGGER.debug("Token forgotten for {}",b.id());
+        });
+  }
 }
