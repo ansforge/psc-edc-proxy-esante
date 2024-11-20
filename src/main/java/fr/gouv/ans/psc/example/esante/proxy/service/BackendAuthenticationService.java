@@ -58,7 +58,7 @@ public class BackendAuthenticationService {
             b -> {
                   BackendAccess access = tokenExchange.getBackendAccessFromPSC(b);
                   
-                  backendAuthentication.switchFutureBackendToken(b.id(), access);
+                  backendAuthentication.switchBackendToken(b.id(), access);
                   LOGGER.debug("Token registered for {}",b.id());
                   
             });
