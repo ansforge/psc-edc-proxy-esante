@@ -58,7 +58,7 @@ Lancer la ligne de commande ci-dessous, où <LEVEL> peut être :
 * `TRACE`
 
 ```bash
-java java -Dlogging.level.fr.gouv.ans=<LEVEL> spring.config.location=/home/ericdegenetais/ciphered_data/missions/ANS/outil_homologation_proxy_CIBA/ -jar psc-esante-proxy-example-0.0.1-SNAPSHOT.jar
+java -Dlogging.level.fr.gouv.ans=<LEVEL> -Dspring.config.location=/path/to/cfg/application.yml -jar psc-esante-proxy-example-0.0.1-SNAPSHOT.jar
 ```
 
 ## En déployant l'image docker
