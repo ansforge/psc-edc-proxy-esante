@@ -58,10 +58,19 @@ public class BackendAuthenticationService {
             b -> {
                   BackendAccess access = tokenExchange.getBackendAccessFromPSC(b);
                   
-                  backendAuthentication.switchFutureBackendToken(b.id(), access);
+                  backendAuthentication.switchBackendToken(b.id(), access);
                   LOGGER.debug("Token registered for {}",b.id());
                   
             });
     return backendAuthentication;
+  }
+  
+  public void wipe(BackendAuthentication backendAuth){
+    this.backendCfg
+        .routes()
+        .forEach(b -> {
+            backendAuth.switchBackendToken(b.id(), null);
+            LOGGER.debug("Token forgotten for {}",b.id());
+        });
   }
 }
