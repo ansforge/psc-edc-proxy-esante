@@ -1,0 +1,596 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "version" : "1.0",
+    "title" : "API proxy e-Santé",
+    "description" : "API des Proxy e-Santé comportant des extensions dédiées aux tests",
+    "contact" : {
+      "name" : "Agence du Numérique en Santé",
+      "email" : "prosanteconnect.editeurs@esante.gouv.fr",
+      "url" : "https://esante.gouv.fr/"
+    }
+  },
+  "servers" : [ {
+    "url" : "http://localhost:3000"
+  } ],
+  "paths" : {
+    "/connect" : {
+      "post" : {
+        "tags" : [ "Connect" ],
+        "summary" : "connect",
+        "description" : "Connect the user with its sofware to the Proxy e-Sante, returns a proxy_session_id",
+        "operationId" : "post-connect",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/connection"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/session"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "string"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "metadata" : {
+                      "type" : "object",
+                      "properties" : {
+                        "nationalId" : {
+                          "type" : "object"
+                        },
+                        "clientID" : {
+                          "type" : "object"
+                        }
+                      }
+                    }
+                  },
+                  "x-examples" : {
+                    "Example 1" : {
+                      "code" : "string",
+                      "message" : "string",
+                      "metadata" : {
+                        "additionalProp1" : { },
+                        "additionalProp2" : { },
+                        "additionalProp3" : { }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "User National ID or Software Client ID Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "string"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "metadata" : {
+                      "type" : "object",
+                      "properties" : {
+                        "nationalId" : {
+                          "type" : "object"
+                        },
+                        "clientID" : {
+                          "type" : "object"
+                        }
+                      }
+                    }
+                  },
+                  "x-examples" : {
+                    "Example 1" : {
+                      "code" : "string",
+                      "message" : "string",
+                      "metadata" : {
+                        "additionalProp1" : { },
+                        "additionalProp2" : { },
+                        "additionalProp3" : { }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict, User session already active",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "string"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "metadata" : {
+                      "type" : "object",
+                      "properties" : {
+                        "nationalId" : {
+                          "type" : "object"
+                        },
+                        "clientID" : {
+                          "type" : "object"
+                        }
+                      }
+                    }
+                  },
+                  "x-examples" : {
+                    "Example 1" : {
+                      "code" : "string",
+                      "message" : "string",
+                      "metadata" : {
+                        "additionalProp1" : { },
+                        "additionalProp2" : { },
+                        "additionalProp3" : { }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          },
+          "503" : {
+            "description" : "Service Unavailable"
+          }
+        },
+        "servers" : [ {
+          "url" : "http://localhost:3000"
+        } ]
+      }
+    },
+    "/disconnect" : {
+      "delete" : {
+        "tags" : [ "Disconnect" ],
+        "summary" : "disconnect",
+        "description" : "Disconnect the user from the Proxy e-Sante",
+        "operationId" : "delete-disconnect",
+        "parameters" : [ {
+          "name" : "proxy_session_id",
+          "in" : "cookie",
+          "description" : "session id of the user to the proxy e-Sante",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "401" : {
+            "description" : "Session ID not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "properties" : {
+                    "code" : {
+                      "type" : "string"
+                    },
+                    "message" : {
+                      "type" : "string"
+                    },
+                    "metadata" : {
+                      "type" : "object",
+                      "properties" : {
+                        "nationalId" : {
+                          "type" : "object"
+                        },
+                        "clientID" : {
+                          "type" : "object"
+                        }
+                      }
+                    }
+                  },
+                  "x-examples" : {
+                    "Example 1" : {
+                      "code" : "string",
+                      "message" : "string",
+                      "metadata" : {
+                        "additionalProp1" : { },
+                        "additionalProp2" : { },
+                        "additionalProp3" : { }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          },
+          "503" : {
+            "description" : "Service Unavailable"
+          }
+        },
+        "servers" : [ {
+          "url" : "http://localhost:3000"
+        } ]
+      }
+    },
+    "/send" : {
+      "get" : {
+        "tags" : [ "Send" ],
+        "summary" : "send get",
+        "description" : "Request tramsited to API PSC, response is optional",
+        "operationId" : "get-send",
+        "parameters" : [ {
+          "name" : "proxy_session_id",
+          "in" : "cookie",
+          "description" : "session id of the user to the proxy e-Sante",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          },
+          "502" : {
+            "description" : "Bad Gateway"
+          },
+          "503" : {
+            "description" : "Service Unavailable"
+          },
+          "504" : {
+            "description" : "Gateway Timeout"
+          }
+        },
+        "servers" : [ {
+          "url" : "http://localhost:3000"
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Send" ],
+        "summary" : "send post",
+        "description" : "Request tramsited to API PSC, response is optional",
+        "operationId" : "post-send",
+        "parameters" : [ {
+          "name" : "proxy_session_id",
+          "in" : "cookie",
+          "description" : "session id of the user to the proxy e-Sante",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          },
+          "502" : {
+            "description" : "Bad Gateway"
+          },
+          "503" : {
+            "description" : "Service Unavailable"
+          },
+          "504" : {
+            "description" : "Gateway Timeout"
+          }
+        },
+        "servers" : [ {
+          "url" : "http://localhost:3000"
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Send" ],
+        "summary" : "send delete",
+        "description" : "Request tramsited to API PSC, response is optional",
+        "operationId" : "delete-send",
+        "parameters" : [ {
+          "name" : "proxy_session_id",
+          "in" : "cookie",
+          "description" : "session id of the user to the proxy e-Sante",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          },
+          "502" : {
+            "description" : "Bad Gateway"
+          },
+          "503" : {
+            "description" : "Service Unavailable"
+          },
+          "504" : {
+            "description" : "Gateway Timeout"
+          }
+        },
+        "servers" : [ {
+          "url" : "http://localhost:3000"
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Send" ],
+        "summary" : "send put",
+        "description" : "Request tramsited to API PSC, response is optional",
+        "operationId" : "put-send",
+        "parameters" : [ {
+          "name" : "proxy_session_id",
+          "in" : "cookie",
+          "description" : "session id of the user to the proxy e-Sante",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          },
+          "502" : {
+            "description" : "Bad Gateway"
+          },
+          "503" : {
+            "description" : "Service Unavailable"
+          },
+          "504" : {
+            "description" : "Gateway Timeout"
+          }
+        },
+        "servers" : [ {
+          "url" : "http://localhost:3000"
+        } ]
+      },
+      "patch" : {
+        "tags" : [ "Send" ],
+        "summary" : "send patch",
+        "description" : "Request tramsited to API PSC, response is optional",
+        "operationId" : "patch-send",
+        "parameters" : [ {
+          "name" : "proxy_session_id",
+          "in" : "cookie",
+          "description" : "session id of the user to the proxy e-Sante",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized"
+          },
+          "500" : {
+            "description" : "Internal Server Error"
+          },
+          "502" : {
+            "description" : "Bad Gateway"
+          },
+          "503" : {
+            "description" : "Service Unavailable"
+          },
+          "504" : {
+            "description" : "Gateway Timeout"
+          }
+        },
+        "servers" : [ {
+          "url" : "http://localhost:3000"
+        } ]
+      }
+    },
+    "/traces" : {
+      "get" : {
+        "tags" : [ "Traces" ],
+        "summary" : "traces",
+        "description" : "Endpoint only for conformity check process\r\nReturns all the traces (logs) recorded by the Proxy e-Sante",
+        "operationId" : "get-traces",
+        "parameters" : [ {
+          "name" : "start",
+          "in" : "query",
+          "description" : "return the traces newer that the start date",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
+          "name" : "end",
+          "in" : "query",
+          "description" : "return the traces older that the start date",
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          }
+        },
+        "servers" : [ {
+          "url" : "http://localhost:3000"
+        } ],
+        "x-internal" : false
+      }
+    }
+  },
+  "tags" : [ {
+    "name" : "Connect",
+    "description" : "initiate connection of the user+software to the Proxy e-Sante"
+  }, {
+    "name" : "Disconnect",
+    "description" : "deactivate the session of user+software to the Proxy e-Sante"
+  }, {
+    "name" : "Traces",
+    "description" : "Returns all the traces/logs recorded on the Proxy e-Sante"
+  }, {
+    "name" : "Send",
+    "description" : "Request transmited via the Proxy e-Sante to the API PSC that returns all the informations of the active session"
+  } ],
+  "components" : {
+    "schemas" : {
+      "session" : {
+        "type" : "object",
+        "title" : "session",
+        "properties" : {
+          "proxy_session_id" : {
+            "type" : "string",
+            "description": "Unique session id to identify the user session"
+          },
+          "session_state" : {
+            "type" : "string",
+            "description": "PSC session state (used to verify that the user session is mapped to a unique PSC session"
+          }
+        }
+      },
+      "connection" : {
+        "type" : "object",
+        "title" : "connection",
+        "properties" : {
+          "nationalId" : {
+            "type" : "string",
+            "description" : "RPPS identifier of the person you wish to authenticate"
+          },
+          "bindingMessage" : {
+            "type" : "string",
+            "description" : "Two-digit random number between 00 and 99 (inclusive), to be generated by the customer, displayed to the user."
+          },
+          "clientId" : {
+            "type" : "string",
+            "description" : "client ID of the software solution"
+          },
+          "channel" : {
+            "type" : "string",
+            "description" : "Used channel for device authentication (CARD or MOBILE)"
+          }
+        }
+      }
+    }
+  }
+}
