@@ -23,6 +23,7 @@
 package fr.gouv.ans.psc.example.esante.proxy.model;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * Élément de trace produit par le système.
@@ -30,6 +31,13 @@ import java.time.OffsetDateTime;
  * @author edegenetais
  */
 public record Trace(
+    TraceType type,
+    String clientId,
+    String IdRPPS,
+    String ipAddress, // source, je suppose ?
+    List<Integer> ports, // source, je suppose ?
+    String proxy_id_session,
+    String dn, //AFAICT, il n'y en pas pas deux (pourrait être manquant jusqu'à réécriture des tests pour supprimer le type de client 'SECRET').
     OffsetDateTime timestamp,// Non-conforme pour simplification à ce stade, à rendre conforme plus tard.
     Request request
 ){}
