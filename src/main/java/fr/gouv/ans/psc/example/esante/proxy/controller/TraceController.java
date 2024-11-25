@@ -24,16 +24,26 @@ package fr.gouv.ans.psc.example.esante.proxy.controller;
 
 import fr.gouv.ans.psc.example.esante.proxy.model.Request;
 import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
+import fr.gouv.ans.psc.example.esante.proxy.model.TraceType;
+import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
+import fr.gouv.ans.psc.example.esante.proxy.service.TechnicalFailure;
+import java.security.cert.X509Certificate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.cloud.gateway.route.Route;
+import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
