@@ -40,4 +40,19 @@ public record Trace(
     String dn, //AFAICT, il n'y en pas pas deux (pourrait être manquant jusqu'à réécriture des tests pour supprimer le type de client 'SECRET').
     OffsetDateTime timestamp,// Non-conforme pour simplification à ce stade, à rendre conforme plus tard.
     Request request
-){}
+){
+
+  public Trace(TraceType type,String clientId, String IdRPPS, String ipAddress, List<Integer> ports, String proxy_id_session, String dn, OffsetDateTime timestamp, Request request) {
+    this.type = type;
+    this.clientId = clientId;
+    this.IdRPPS = IdRPPS;
+    this.ipAddress = ipAddress;
+    this.ports = ports;
+    this.proxy_id_session = proxy_id_session;
+    this.dn = dn;
+    this.timestamp = timestamp;
+    this.request = request;
+    this.type.validate(this);
+  }
+  
+}
