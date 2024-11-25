@@ -20,41 +20,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy.controller;
+package fr.gouv.ans.psc.example.esante.proxy.service;
 
 import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
-import fr.gouv.ans.psc.example.esante.proxy.service.TraceService;
-import java.time.OffsetDateTime;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
+import org.springframework.stereotype.Component;
 
 /**
- * Ce contrôleur propose le service getTrace défini par la spécification.
- *
  * @author edegenetais
  */
-@RestController
-public class TraceController {
-  private TraceService traceSrv;
+@Component
+public class TraceService {
 
-  public TraceController(@Autowired TraceService traceSrv) {
-    this.traceSrv = traceSrv;
+  public final List<Trace> store;
+
+  public TraceService() {
+    store = new LinkedList<>();
   }
   
-
-  @GetMapping("/gettrace")
-  public Flux<Trace> gettraces(@RequestParam("start") OffsetDateTime startDate, @RequestParam(required = false, name = "end") OffsetDateTime end) {
-    final List<Trace> traceStoreList = traceSrv.getTraces();
-    final OffsetDateTime effectiveEnd = Objects.requireNonNullElse(end, OffsetDateTime.now());
-    return Flux.fromStream(
-        traceStoreList.stream()
-            .filter(t -> startDate.isBefore(t.timestamp()))
-            .filter(t -> effectiveEnd.isAfter(t.timestamp())));
+  public synchronized void record(Trace trace) {
+    store.add(trace);
   }
-
+  
+  public synchronized List<Trace> getTraces() {
+    return List.copyOf(store);
+  }
 }
