@@ -78,6 +78,7 @@ public class SessionController {
               connection.channel()
           );
           webSession.getAttributes().put(SessionAttributes.CLIENT_ID, connection.clientId());
+          webSession.getAttributes().put(SessionAttributes.NATIONAL_ID, connection.nationalId());
           webSession.getAttributes().put(SessionAttributes.CIBA_SESSION, cibaSession);
           
           BackendAuthentication backendAuth = this.backendAuthService.authenticate(cibaSession,connection.clientId());

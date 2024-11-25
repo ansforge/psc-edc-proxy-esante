@@ -32,5 +32,6 @@ public final class SessionAttributes {
   public static final String CIBA_SESSION = "CIBA_sessionb";
   public static final String BACKEND_AUTH_ATTR = "backend_auth";
   public static final String CLIENT_ID = "client_id";
+  public static final String NATIONAL_ID = "national_id";
   private SessionAttributes(){}
 }
