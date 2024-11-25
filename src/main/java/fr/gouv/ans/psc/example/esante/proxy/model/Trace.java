@@ -34,11 +34,11 @@ public record Trace(
     TraceType type,
     String clientId,
     String IdRPPS,
-    String ipAddress, // source, je suppose ?
-    List<Integer> ports, // source, je suppose ?
+    String ipAddress,
+    List<Integer> ports,
     String proxy_id_session,
-    String dn, //AFAICT, il n'y en pas pas deux (pourrait être manquant jusqu'à réécriture des tests pour supprimer le type de client 'SECRET').
-    OffsetDateTime timestamp,// Non-conforme pour simplification à ce stade, à rendre conforme plus tard.
+    String dn,
+    OffsetDateTime timestamp,// FIXME : s'assurer que ceci permet un affichage conforme à date-time pour conformité à l'API
     Request request
 ){
 
