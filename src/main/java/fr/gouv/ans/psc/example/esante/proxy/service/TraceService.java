@@ -22,10 +22,17 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.service;
 
+import fr.gouv.ans.psc.example.esante.proxy.controller.SessionAttributes;
+import fr.gouv.ans.psc.example.esante.proxy.model.Request;
 import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
+import fr.gouv.ans.psc.example.esante.proxy.model.TraceType;
+import java.security.cert.X509Certificate;
+import java.time.OffsetDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.WebSession;
 
 /**
  * @author edegenetais
@@ -39,8 +46,21 @@ public class TraceService {
     store = new LinkedList<>();
   }
   
-  public synchronized void record(Trace trace) {
-    store.add(trace);
+  public void record(TraceType traceType, final WebSession session, final String sourceAddress, final List<Integer> sourcePorts, final Request outGoingRequest) {
+    final String clientId = session.getAttribute(SessionAttributes.CLIENT_ID);
+    final String nationalId = session.getAttribute(SessionAttributes.NATIONAL_ID);
+    final BackendAuthentication backendAuth = session.getAttribute(SessionAttributes.BACKEND_AUTH_ATTR);
+    Optional<X509Certificate> crt = backendAuth.credential.getClientCert();
+    final Trace newTrace = new Trace(
+        traceType, 
+        clientId, 
+        nationalId, 
+        sourceAddress, 
+        sourcePorts, 
+        session.getId(), 
+        crt.isPresent() ? crt.get().getSubjectX500Principal().toString() : null, 
+        OffsetDateTime.now(), outGoingRequest);
+    store.add(newTrace);
   }
   
   public synchronized List<Trace> getTraces() {

@@ -22,18 +22,12 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller.sendGW;
 
-import fr.gouv.ans.psc.example.esante.proxy.controller.SessionAttributes;
 import fr.gouv.ans.psc.example.esante.proxy.model.Request;
-import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
 import fr.gouv.ans.psc.example.esante.proxy.model.TraceType;
-import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
 import fr.gouv.ans.psc.example.esante.proxy.service.TechnicalFailure;
 import fr.gouv.ans.psc.example.esante.proxy.service.TraceService;
-import java.security.cert.X509Certificate;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -84,24 +78,7 @@ public class TraceFilter implements GlobalFilter {
       final Request newRequest = new Request(nomApiPsc, requestMethod, requestPath);
       
       final WebSession session = exchange.getSession().toFuture().get();
-      final String clientId = session.getAttribute(SessionAttributes.CLIENT_ID);
-      final String nationalId = session.getAttribute(SessionAttributes.NATIONAL_ID);
-      final BackendAuthentication backendAuth = session.getAttribute(SessionAttributes.BACKEND_AUTH_ATTR);
-      Optional<X509Certificate> crt = backendAuth.credential.getClientCert();
-      
-      final Trace newTrace = new Trace(
-          TraceType.SEND,
-          clientId,
-          nationalId,
-          sourceAddress,
-          sourcePorts,
-          session.getId(),
-          crt.isPresent()?crt.get().getSubjectX500Principal().toString():null,
-          OffsetDateTime.now(),
-          newRequest
-      );
-      
-      traceSrv.record(newTrace);
+      traceSrv.record( TraceType.SEND,session, sourceAddress, sourcePorts, newRequest);
       
       return chain.filter(exchange);
     } catch (InterruptedException ex) {
@@ -111,4 +88,5 @@ public class TraceFilter implements GlobalFilter {
        throw new TechnicalFailure("Failure while fetching session data",ex.getCause());
     }
   }
+
 }
