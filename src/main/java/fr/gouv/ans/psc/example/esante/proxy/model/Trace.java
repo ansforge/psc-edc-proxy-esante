@@ -23,6 +23,7 @@
 package fr.gouv.ans.psc.example.esante.proxy.model;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * Élément de trace produit par le système.
@@ -30,6 +31,28 @@ import java.time.OffsetDateTime;
  * @author edegenetais
  */
 public record Trace(
-    OffsetDateTime timestamp,// Non-conforme pour simplification à ce stade, à rendre conforme plus tard.
+    TraceType type,
+    String clientId,
+    String IdRPPS,
+    String ipAddress,
+    List<Integer> ports,
+    String proxy_id_session,
+    String dn,
+    OffsetDateTime timestamp,// FIXME : s'assurer que ceci permet un affichage conforme à date-time pour conformité à l'API
     Request request
-){}
+){
+
+  public Trace(TraceType type,String clientId, String IdRPPS, String ipAddress, List<Integer> ports, String proxy_id_session, String dn, OffsetDateTime timestamp, Request request) {
+    this.type = type;
+    this.clientId = clientId;
+    this.IdRPPS = IdRPPS;
+    this.ipAddress = ipAddress;
+    this.ports = ports;
+    this.proxy_id_session = proxy_id_session;
+    this.dn = dn;
+    this.timestamp = timestamp;
+    this.request = request;
+    this.type.validate(this);
+  }
+  
+}

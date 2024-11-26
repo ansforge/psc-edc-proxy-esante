@@ -22,9 +22,19 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.model;
 
+import java.util.Objects;
+
 /**
  * Modèle d'une requête unitaire au sein d'une trace (whatever it means).
  * 
  * @author edegenetais
  */
-public record Request(String nomApiPsc, String methode, String path){}
+public record Request(String nomApiPsc, String methode, String path){
+
+  public Request(String nomApiPsc, String methode, String path) {
+    this.nomApiPsc = Objects.requireNonNull(nomApiPsc,"nomApiPsc is mandatory");
+    this.methode = Objects.requireNonNull(methode,"methode is mandatory");
+    this.path = Objects.requireNonNull(path, "path is mandatory");
+  }
+  
+}

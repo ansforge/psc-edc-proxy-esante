@@ -36,7 +36,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
 
@@ -118,6 +121,16 @@ public class AbstractProxyIntegrationTest {
   protected String discoveryData;
   
   protected AbstractProxyIntegrationTest(){}
+  
+  @BeforeEach
+  public void webTestClientPreset() {
+    testClient=testClient.mutateWith(new WebTestClientConfigurer(){
+      @Override
+      public void afterConfigurerAdded(WebTestClient.Builder builder, WebHttpHandlerBuilder httpHandlerBuilder, ClientHttpConnector connector) {
+        builder.defaultHeader("X-Forwarded-For", "127.0.0.1");
+      }
+    });
+  }
 
   @BeforeEach
   public void setBasePscMockBehavior() throws IOException {
