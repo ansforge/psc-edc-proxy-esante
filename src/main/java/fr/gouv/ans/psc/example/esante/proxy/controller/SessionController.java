@@ -81,14 +81,14 @@ public class SessionController {
         () -> {
           try {
             String sessionId = webSession.getId();
+            webSession.getAttributes().put(SessionAttributes.CLIENT_ID, connection.clientId());
+            webSession.getAttributes().put(SessionAttributes.NATIONAL_ID, connection.nationalId());
             CIBASession cibaSession =
                 this.cibaService.cibaAuthentication(
                     connection.bindingMessage(),
                     connection.nationalId(),
                     connection.clientId(),
                     connection.channel());
-            webSession.getAttributes().put(SessionAttributes.CLIENT_ID, connection.clientId());
-            webSession.getAttributes().put(SessionAttributes.NATIONAL_ID, connection.nationalId());
             webSession.getAttributes().put(SessionAttributes.CIBA_SESSION, cibaSession);
 
             BackendAuthentication backendAuth =
