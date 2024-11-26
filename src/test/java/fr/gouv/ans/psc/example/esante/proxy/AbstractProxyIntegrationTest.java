@@ -48,7 +48,7 @@ import reactor.core.publisher.Mono;
  * @author edegenetais
  */
 public class AbstractProxyIntegrationTest {
-
+  protected static final String TEST_FORWARDED_FOR = "127.0.0.3";
   protected static final String AUT_REQ_ID = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im15LWF1dGgtcmVxLWlkLTI1NSJ9.zCIf0ngT65O3wXeWsUetWasqAYBNsq1_m-wEUc_QhkQ";
   protected static final String ID_NAT = "500000001815646/CPAT00045";
   protected static final String TEST_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJzZXNzaW9uX3N0YXRlIjoic2Vzc2lvbi1zdGF0ZS0yNTYteHh4In0.ut7H8Xpxz-6HobZdhH9UF6o5Hdzuv_hdvur-VhDAf4Y";
@@ -126,7 +126,7 @@ public class AbstractProxyIntegrationTest {
     testClient=testClient.mutateWith(new WebTestClientConfigurer(){
       @Override
       public void afterConfigurerAdded(WebTestClient.Builder builder, WebHttpHandlerBuilder httpHandlerBuilder, ClientHttpConnector connector) {
-        builder.defaultHeader("X-Forwarded-For", "127.0.0.1");
+        builder.defaultHeader("X-Forwarded-For", TEST_FORWARDED_FOR);
       }
     });
   }

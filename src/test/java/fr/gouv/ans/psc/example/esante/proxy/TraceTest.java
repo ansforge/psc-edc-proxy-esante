@@ -24,10 +24,15 @@ package fr.gouv.ans.psc.example.esante.proxy;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
+import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
 import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
+import fr.gouv.ans.psc.example.esante.proxy.model.TraceType;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.X509Name;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,6 +64,193 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
         WireMock.any(UrlPattern.ANY).willReturn(WireMock.okJson("OK")));
     backend2.stubFor(
         WireMock.any(UrlPattern.ANY).willReturn(WireMock.okJson("OK")));
+  }
+  
+  @Test
+  public void connectOnMTLSClientHasDnInTrace() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .post()
+        .uri("/connect")
+        .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
+        .exchange().expectStatus().is2xxSuccessful();
+    
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    final X500Name effectiveDN = new X500Name(traces.getFirst().dn());
+    final X500Name expectedDn = new X500Name("C = FR, ST = Ile-de-France, L = Montrouge, O = Henix, OU = EDC-test-CA, CN = client.edc.proxy.1, emailAddress = \"edegenetais+client.edc.proxy.1@henix.fr\"");
+    Assertions.assertEquals(expectedDn, effectiveDN);
+  }
+  
+  @Test
+  public void getConnectTrace() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .post()
+        .uri("/connect")
+        .bodyValue(new Connection(ID_NAT, "42", TEST_CLIENT_ID, "CARD"))
+        .exchange().expectStatus().is2xxSuccessful();
+
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(TraceType.CONNECT_SUCCESS, traces.getFirst().type());
+  }
+  
+  @Test
+  public void sendTraceIsSendType() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .get()
+        .uri("/send/backend-1/carebear1")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange().expectStatus().is2xxSuccessful();
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(TraceType.SEND, traces.getFirst().type());
+  }
+  
+  @Test
+  public void sendTraceHasSessionId() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .get()
+        .uri("/send/backend-1/carebear1")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange().expectStatus().is2xxSuccessful();
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(sessionId, traces.getFirst().proxy_id_session());
+  }
+  
+  @Test
+  public void sendTraceHasUserId() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .get()
+        .uri("/send/backend-1/carebear1")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange().expectStatus().is2xxSuccessful();
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(ID_NAT, traces.getFirst().IdRPPS());
+  }
+  
+  @Test
+  public void sendTraceHasClientId() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .get()
+        .uri("/send/backend-1/carebear1")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange().expectStatus().is2xxSuccessful();
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(TEST_CLIENT_ID, traces.getFirst().clientId());
+  }
+  
+   
+  @Test
+  public void sendTraceHasForwardedAddress() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .get()
+        .uri("/send/backend-1/carebear1")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange().expectStatus().is2xxSuccessful();
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(TEST_FORWARDED_FOR, traces.getFirst().ipAddress());
   }
   
   /**
