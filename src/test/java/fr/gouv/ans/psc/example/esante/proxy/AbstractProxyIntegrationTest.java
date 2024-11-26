@@ -30,7 +30,6 @@ import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
