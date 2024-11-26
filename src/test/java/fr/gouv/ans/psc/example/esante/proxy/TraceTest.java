@@ -96,6 +96,36 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
   }
   
   @Test
+  public void getConnectFailureTrace() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    final String badClientId = "unknown-id";
+    testClient
+        .post()
+        .uri("/connect")
+        .bodyValue(new Connection(ID_NAT, "42", badClientId, "CARD"))
+        .exchange().expectStatus().is5xxServerError();
+    
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(TraceType.CONNECT_FAILURE, traces.getFirst().type());
+    Assertions.assertEquals(badClientId, traces.getFirst().clientId());
+    Assertions.assertEquals(ID_NAT, traces.getFirst().IdRPPS());
+  }
+  
+  @Test
   public void getConnectTrace() {
     OffsetDateTime testBegin = OffsetDateTime.now();
     testClient
