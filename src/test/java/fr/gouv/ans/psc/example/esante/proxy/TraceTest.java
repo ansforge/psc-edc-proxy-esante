@@ -78,7 +78,7 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
             .get()
             .uri(
                 (UriBuilder b) ->
-                    b.path("/gettrace")
+                    b.path("/traces")
                         .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
                         .build())
             .exchange()
@@ -113,7 +113,7 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
         .get()
         .uri(
             (UriBuilder b) ->
-                b.path("/gettrace")
+                b.path("/traces")
                     .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
                     .build()
         )
