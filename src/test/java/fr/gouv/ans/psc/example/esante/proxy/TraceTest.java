@@ -25,6 +25,7 @@ package fr.gouv.ans.psc.example.esante.proxy;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
 import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
+import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
 import fr.gouv.ans.psc.example.esante.proxy.model.TraceType;
 import java.time.OffsetDateTime;
@@ -91,6 +92,95 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
     final X500Name effectiveDN = new X500Name(traces.getFirst().dn());
     final X500Name expectedDn = new X500Name("C = FR, ST = Ile-de-France, L = Montrouge, O = Henix, OU = EDC-test-CA, CN = client.edc.proxy.1, emailAddress = \"edegenetais+client.edc.proxy.1@henix.fr\"");
     Assertions.assertEquals(expectedDn, effectiveDN);
+  }
+  
+  @Test
+  public void sendOnMTLSClientHasDnInTrace() {
+    
+    Session session =
+        testClient
+            .post()
+            .uri("/connect")
+            .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBody(Session.class)
+            .returnResult().getResponseBody();
+
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient.get().uri("/send/backend-1/carebear1")
+        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .exchange().expectStatus().is2xxSuccessful();
+    OffsetDateTime testEnd = OffsetDateTime.now();
+    
+    testClient.delete().uri("/disconnect")
+        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .exchange().expectStatus().isOk();
+
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .queryParam("end", testEnd.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(TraceType.SEND, traces.getFirst().type());
+    final X500Name effectiveDN = new X500Name(traces.getFirst().dn());
+    final X500Name expectedDn = new X500Name("C = FR, ST = Ile-de-France, L = Montrouge, O = Henix, OU = EDC-test-CA, CN = client.edc.proxy.1, emailAddress = \"edegenetais+client.edc.proxy.1@henix.fr\"");
+    Assertions.assertEquals(expectedDn, effectiveDN);
+  }
+  
+  @Test
+  public void sendOnSessionHasId() {
+    
+    Session session =
+        testClient
+            .post()
+            .uri("/connect")
+            .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBody(Session.class)
+            .returnResult().getResponseBody();
+
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient.get().uri("/send/backend-1/carebear1")
+        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .exchange().expectStatus().is2xxSuccessful();
+    OffsetDateTime testEnd = OffsetDateTime.now();
+    
+    testClient.delete().uri("/disconnect")
+        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .exchange().expectStatus().isOk();
+
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .queryParam("end", testEnd.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(session.proxySessionId(), traces.getFirst().proxy_id_session());
   }
   
   @Test
