@@ -129,4 +129,109 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
     Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
     Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
   }
+  
+  /**
+   * In this test, we'll be sending a get query and checking that we get its trace.
+   * To be sure we're not getting traces from other calls, we'll use the begin parameter.
+   */
+  @Test
+  public void putSendTrace() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .put()
+        .uri("/send/backend-1/carebear2")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange().expectStatus().is2xxSuccessful();
+    
+    List<Trace> traces =
+    testClient
+        .get()
+        .uri(
+            (UriBuilder b) ->
+                b.path("/traces")
+                    .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                    .build()
+        )
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBodyList(Trace.class)
+        .hasSize(1)
+        .returnResult()
+        .getResponseBody();
+    final Trace trace = traces.get(0);
+    Assertions.assertEquals("PUT", trace.request().methode());
+    Assertions.assertEquals("/carebear2", trace.request().path());
+    Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
+    Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
+  }
+  
+  /**
+   * In this test, we'll be sending a get query and checking that we get its trace.
+   * To be sure we're not getting traces from other calls, we'll use the begin parameter.
+   */
+  @Test
+  public void patchSendTrace() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .patch()
+        .uri("/send/backend-1/carebear2")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange().expectStatus().is2xxSuccessful();
+    
+    List<Trace> traces =
+    testClient
+        .get()
+        .uri(
+            (UriBuilder b) ->
+                b.path("/traces")
+                    .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                    .build()
+        )
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBodyList(Trace.class)
+        .hasSize(1)
+        .returnResult()
+        .getResponseBody();
+    final Trace trace = traces.get(0);
+    Assertions.assertEquals("PATCH", trace.request().methode());
+    Assertions.assertEquals("/carebear2", trace.request().path());
+    Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
+    Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
+  }
+  
+   /**
+   * In this test, we'll be sending a get query and checking that we get its trace.
+   * To be sure we're not getting traces from other calls, we'll use the begin parameter.
+   */
+  @Test
+  public void deleteSendTrace() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .delete()
+        .uri("/send/backend-1/carebear2")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange().expectStatus().is2xxSuccessful();
+    
+    List<Trace> traces =
+    testClient
+        .get()
+        .uri(
+            (UriBuilder b) ->
+                b.path("/traces")
+                    .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                    .build()
+        )
+        .exchange()
+        .expectStatus().is2xxSuccessful()
+        .expectBodyList(Trace.class)
+        .hasSize(1)
+        .returnResult()
+        .getResponseBody();
+    final Trace trace = traces.get(0);
+    Assertions.assertEquals("DELETE", trace.request().methode());
+    Assertions.assertEquals("/carebear2", trace.request().path());
+    Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
+    Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
+  }
 }
