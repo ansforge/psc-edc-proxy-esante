@@ -49,9 +49,6 @@ import reactor.core.publisher.Mono;
 @AutoConfigureWebTestClient(timeout = "PT30S")
 public class SessionTests extends AbstractProxyIntegrationTest {
   private static final String MY_CLIENT_SECRET = "my_client_secret";
-  
-  @Autowired 
-  private WebTestClient testClient;
 
   @Test
   public void passingConnectQueryExhangesIDPTokens() {
