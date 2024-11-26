@@ -22,7 +22,6 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller;
 
-import com.nimbusds.oauth2.sdk.ParseException;
 import fr.gouv.ans.psc.example.esante.proxy.UnauthorizedException;
 import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
@@ -33,9 +32,7 @@ import fr.gouv.ans.psc.example.esante.proxy.service.BaseTraceData;
 import fr.gouv.ans.psc.example.esante.proxy.service.CIBASession;
 import fr.gouv.ans.psc.example.esante.proxy.service.PSCSessionService;
 import fr.gouv.ans.psc.example.esante.proxy.service.TraceService;
-import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,12 +67,7 @@ public class SessionController {
   public Mono<Session> connect(
       @RequestBody Connection connection, 
       @RequestAttribute(name = TraceHelper.BASE_TRACE_DATA_ATTR) BaseTraceData baseTraceData, 
-      WebSession webSession)
-      throws IOException,
-          ParseException,
-          InterruptedException,
-          ExecutionException,
-          java.text.ParseException {
+      WebSession webSession) {
 
     Callable<Session> sessionSupplier =
         () -> {
