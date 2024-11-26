@@ -47,7 +47,7 @@ import org.springframework.web.util.UriBuilder;
  */
 @SpringBootTest(classes = {EsanteProxyApplication.class})
 @AutoConfigureWebTestClient
-public class GlobalSendBehaviorsTest  extends AbstractAuthenticatedProxyIntegrationTest {
+public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
   
   /**
    * Pour ces tests, le comportement exact du bcakend ne nous intéresse pas, 
