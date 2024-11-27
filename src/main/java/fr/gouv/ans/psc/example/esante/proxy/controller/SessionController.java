@@ -31,6 +31,8 @@ import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthenticationService
 import fr.gouv.ans.psc.example.esante.proxy.service.BaseTraceData;
 import fr.gouv.ans.psc.example.esante.proxy.service.CIBASession;
 import fr.gouv.ans.psc.example.esante.proxy.service.PSCSessionService;
+import fr.gouv.ans.psc.example.esante.proxy.service.SessionConflict;
+import fr.gouv.ans.psc.example.esante.proxy.service.SessionService;
 import fr.gouv.ans.psc.example.esante.proxy.service.TraceService;
 import java.util.concurrent.Callable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,15 +54,18 @@ public class SessionController {
   private final PSCSessionService cibaService;
   private final BackendAuthenticationService backendAuthService;
   private final TraceService traceSrv;
+  private final SessionService sessionSrv;
   
   public SessionController(
       @Autowired PSCSessionService cibaService,
       @Autowired BackendAuthenticationService backendAuthService,
-      @Autowired TraceService traceSrv
+      @Autowired TraceService traceSrv,
+      @Autowired SessionService sessionSrv
   ) {
     this.cibaService = cibaService;
     this.backendAuthService = backendAuthService;
     this.traceSrv = traceSrv;
+    this.sessionSrv=sessionSrv;
   }
 
   @PostMapping("/connect")
@@ -68,13 +73,15 @@ public class SessionController {
       @RequestBody Connection connection, 
       @RequestAttribute(name = TraceHelper.BASE_TRACE_DATA_ATTR) BaseTraceData baseTraceData, 
       WebSession webSession) {
-
     Callable<Session> sessionSupplier =
         () -> {
           try {
             String sessionId = webSession.getId();
             webSession.getAttributes().put(SessionAttributes.CLIENT_ID, connection.clientId());
             webSession.getAttributes().put(SessionAttributes.NATIONAL_ID, connection.nationalId());
+            if (sessionSrv.hasSession(connection.clientId(), connection.nationalId())) {
+              throw new SessionConflict(connection.clientId(), connection.nationalId());
+            }
             CIBASession cibaSession =
                 this.cibaService.cibaAuthentication(
                     connection.bindingMessage(),
@@ -94,6 +101,7 @@ public class SessionController {
                 baseTraceData.remoteAddress(),
                 baseTraceData.sourcePorts(),
                 null);
+            sessionSrv.registerSession(connection.clientId(), connection.nationalId());
             return new Session(sessionId, cibaSession.sessionState());
           } catch (RuntimeException re) {
             this.traceSrv.record(
