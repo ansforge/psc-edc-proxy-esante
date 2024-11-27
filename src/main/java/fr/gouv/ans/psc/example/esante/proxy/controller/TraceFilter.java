@@ -23,6 +23,8 @@
 package fr.gouv.ans.psc.example.esante.proxy.controller;
 
 import fr.gouv.ans.psc.example.esante.proxy.service.BaseTraceData;
+import java.util.concurrent.ExecutionException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -37,10 +39,14 @@ import reactor.core.publisher.Mono;
 @Component
 @Order(Integer.MIN_VALUE)
 public class TraceFilter implements WebFilter {
+  private static final Logger LOGGER = LoggerFactory.getLogger(TraceFilter.class);
+  
   public static final String REQUEST = "REQUEST";
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-    LoggerFactory.getLogger(TraceFilter.class).debug("TraceFilter applied.");
+    LOGGER.trace("TraceFilter applied in query {} for session {}.",
+            exchange.getRequest().getId(),
+            new SessionIdRetriever(exchange));
     BaseTraceData baseTraceData = TraceHelper.getBaseTraceData(exchange);
     
     exchange
@@ -48,6 +54,29 @@ public class TraceFilter implements WebFilter {
             .put(TraceHelper.BASE_TRACE_DATA_ATTR, baseTraceData);
     return chain.filter(
         exchange);
+  }
+
+  private static class SessionIdRetriever extends Object {
+
+    private final ServerWebExchange exchange;
+
+    public SessionIdRetriever(ServerWebExchange exchange) {
+      this.exchange = exchange;
+    }
+
+    @Override
+    public String toString() {
+      try {
+        if (exchange.getSession().toFuture().get() != null) {
+          return exchange.getSession().toFuture().get().getId();
+        } else {
+          return null;
+        }
+      } catch (InterruptedException | ExecutionException e) {
+        LOGGER.warn("Session retrieval interrupted during TraceFilter trace attempt.",e);
+        return null;
+      }
+    }
   }
  
 }

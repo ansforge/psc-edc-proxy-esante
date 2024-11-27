@@ -120,6 +120,10 @@ public class SessionController {
         CIBASession cibaSession = webSession.getAttribute(SessionAttributes.CIBA_SESSION);
       
         this.cibaService.logout(cibaSession, clientId);
+        
+        BackendAuthentication backendAuth = webSession.getAttribute(SessionAttributes.BACKEND_AUTH_ATTR);
+        this.backendAuthService.wipe(backendAuth);
+        
         return sessionEnd.block();
       };
       return Mono.fromCallable(sessionDestroyer);

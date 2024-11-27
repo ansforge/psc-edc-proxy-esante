@@ -1,0 +1,170 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "1.0",
+    "title": "API PSC tests de Conformite",
+    "description": "API Pro Santé Connectée utilisée pour les tests de conformité de l'API Proxy",
+    "contact": {
+      "name": "Agence du Numérique en Santé",
+      "email": "prosanteconnect.editeurs@esante.gouv.fr",
+      "url": "https://esante.gouv.fr/"
+    },
+    "license": {
+      "url": "https://mit-license.org/",
+      "name": "MIT license"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://${prefix}.preprod.mockservice.platines.esante.gouv.fr/mockservice/apipsc",
+      "description": "Instance Platines du mock service",
+      "variables": {
+        "prefix": {
+          "description": "Préfixe de l'instance du mockservice déployé par la plateforme Platines",
+          "default": ""
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/signsessiondata": {
+      "post": {
+        "tags": [
+          "Sign"
+        ],
+        "summary": "post session info to sign",
+        "description": "Request used by API PSC to return all session information from PS to API-PSC",
+        "operationId": "post-sign-session-data",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignedSessionData"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "AuthServerAPI": []
+          }
+        ],
+        "servers": [
+          {
+            "url": "https://${prefix}.preprod.mockservice.platines.esante.gouv.fr/mockservice/apipsc",
+            "description": "Instance Platines du mock service",
+            "variables": {
+              "prefix": {
+                "description": "Préfixe de l'instance du mockservice déployé par la plateforme Platines",
+                "default": ""
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Sign",
+      "description": "Opérations de signature utilisées pour les tests"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "AuthServerAPI": {
+        "type": "openIdConnect",
+        "openIdConnectUrl": "https://auth.server.api.edc-psc.esante.gouv.fr/realms/signsessiondata/protocol/openid-connect/auth"
+      }
+    },
+    "schemas": {
+      "SessionData": {
+        "type": "object",
+        "title": "SessionData",
+        "description": "All the informations about the session",
+        "properties": {
+          "nationalId": {
+            "type": "string",
+            "description": "Unique identifier for the given user."
+          },
+          "clientID": {
+            "type": "string",
+            "description": "Unique identifier for software solution."
+          },
+          "proxy_session_id": {
+            "type": "string",
+            "description": "unique identifier of the session between the (user and software) and the Proxy e-Sante."
+          },
+          "session_state": {
+            "type": "string",
+            "description": "session_state of the PSC session of the user."
+          }
+        },
+        "required": [
+          "nationalId",
+          "clientID",
+          "proxy_session_id",
+          "session_state"
+        ]
+      },
+      "SignedSessionData": {
+        "type": "object",
+        "title": "SessionData",
+        "description": "All the informations about the session",
+        "properties": {
+          "nationalId": {
+            "type": "string",
+            "description": "Unique identifier for the given user."
+          },
+          "clientID": {
+            "type": "string",
+            "description": "Unique identifier for software solution."
+          },
+          "proxy_session_id": {
+            "type": "string",
+            "description": "unique identifier of the session between the (user and software) and the Proxy e-Sante."
+          },
+          "session_state": {
+            "type": "string",
+            "description": "session_state of the PSC session of the user."
+          },
+          "signature": {
+            "type": "string",
+            "description": "signature made by the API PSC and returned with the response"
+          }
+        },
+        "required": [
+          "nationalId",
+          "clientID",
+          "proxy_session_id",
+          "session_state",
+          "signature"
+        ]
+      }
+    }
+  }
+}

@@ -37,7 +37,7 @@ public class BackendAuthentication {
     this.credential = credential;
   }
   
-  public BackendAccess switchFutureBackendToken(String backendId, BackendAccess tokenFuture) {
+  public BackendAccess switchBackendToken(String backendId, BackendAccess tokenFuture) {
     return this.backendAccessTokens.put(backendId, tokenFuture);
   }
   
