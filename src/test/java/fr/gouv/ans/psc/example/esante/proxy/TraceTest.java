@@ -40,12 +40,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.util.UriBuilder;
 
 /**
- * Cette suite de tests vise à valider la mise en place de comportements globaux sur l'endpoint send
- * (aka : nous n'avons pas besoin d'ajouter explicitement le contenu à la configuration).
- *
- * Ceci évitera que de laisser les comportements importants à la merci de la configuration du proxy.
- * Le cobaye choisi est (une ébauche grossière de) la fonctionnalité de trace.
- * Il en résulte que ce test devra évoluer quand les traces définitives seront développées.
+ * La version initiale de cette suite de test a été mise en place pour tester le partage d'information 
+ * entre la partie gateway (`/send`) et les autres contrôleurs, et la mise en place automatiques 
+ * de comportement spécifique au prox sur la partie `/send`.
+ * Elle teste désormais le sous-système des traces.
  *
  * @author edegenetais
  */
@@ -92,6 +90,20 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
     final X500Name effectiveDN = new X500Name(traces.getFirst().dn());
     final X500Name expectedDn = new X500Name("C = FR, ST = Ile-de-France, L = Montrouge, O = Henix, OU = EDC-test-CA, CN = client.edc.proxy.1, emailAddress = \"edegenetais+client.edc.proxy.1@henix.fr\"");
     Assertions.assertEquals(expectedDn, effectiveDN);
+  }
+  
+  @Test
+  public void acceptIso8061StartEndAndEnd() {
+    String yesterdayNoonISO8601UTC = "2024-11-25T12:00:00.000Z";
+    String yesterdayEveningISO8601UTC = "2024-11-25T21:00:00.000Z";
+    testClient.get().uri(
+        b -> b.path("/traces")
+        .queryParam("start", yesterdayNoonISO8601UTC)
+        .queryParam("end", yesterdayEveningISO8601UTC)
+        .build())
+      .exchange().expectStatus().is2xxSuccessful()
+        .expectBodyList(Trace.class)
+        .hasSize(0);
   }
   
   @Test
