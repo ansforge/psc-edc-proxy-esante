@@ -95,6 +95,20 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
   }
   
   @Test
+  public void acceptIso8061StartEndAndEnd() {
+    String yesterdayNoonISO8601UTC = "2024-11-25T12:00:00.000Z";
+    String yesterdayEveningISO8601UTC = "2024-11-25T21:00:00.000Z";
+    testClient.get().uri(
+        b -> b.path("/traces")
+        .queryParam("start", yesterdayNoonISO8601UTC)
+        .queryParam("end", yesterdayEveningISO8601UTC)
+        .build())
+      .exchange().expectStatus().is2xxSuccessful()
+        .expectBodyList(Trace.class)
+        .hasSize(0);
+  }
+  
+  @Test
   public void sendOnMTLSClientHasDnInTrace() {
     
     Session session =
