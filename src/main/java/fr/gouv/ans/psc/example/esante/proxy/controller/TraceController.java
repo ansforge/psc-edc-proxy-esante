@@ -47,7 +47,7 @@ public class TraceController {
   }
   
 
-  @GetMapping("/gettrace")
+  @GetMapping("/traces")
   public Flux<Trace> gettraces(@RequestParam("start") OffsetDateTime startDate, @RequestParam(required = false, name = "end") OffsetDateTime end) {
     final List<Trace> traceStoreList = traceSrv.getTraces();
     final OffsetDateTime effectiveEnd = Objects.requireNonNullElse(end, OffsetDateTime.now());

@@ -50,7 +50,12 @@ public class TraceService {
     final String clientId = session.getAttribute(SessionAttributes.CLIENT_ID);
     final String nationalId = session.getAttribute(SessionAttributes.NATIONAL_ID);
     final BackendAuthentication backendAuth = session.getAttribute(SessionAttributes.BACKEND_AUTH_ATTR);
-    Optional<X509Certificate> crt = backendAuth.credential.getClientCert();
+    Optional<X509Certificate> crt;
+    if(backendAuth==null) {
+      crt=Optional.empty();
+    } else {
+      crt = backendAuth.credential.getClientCert();
+    }
     final Trace newTrace = new Trace(
         traceType, 
         clientId, 
