@@ -22,6 +22,7 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -38,11 +39,10 @@ public record Trace(
     List<Integer> ports,
     String proxy_id_session,
     String dn,
-    OffsetDateTime timestamp,// FIXME : s'assurer que ceci permet un affichage conforme à date-time pour conformité à l'API
-    Request request
-){
+    OffsetDateTime timestamp,
+    @JsonInclude(JsonInclude.Include.NON_NULL) Request apiRequest) {
 
-  public Trace(TraceType type,String clientId, String IdRPPS, String ipAddress, List<Integer> ports, String proxy_id_session, String dn, OffsetDateTime timestamp, Request request) {
+  public Trace(TraceType type,String clientId, String IdRPPS, String ipAddress, List<Integer> ports, String proxy_id_session, String dn, OffsetDateTime timestamp, Request apiRequest) {
     this.type = type;
     this.clientId = clientId;
     this.IdRPPS = IdRPPS;
@@ -51,7 +51,7 @@ public record Trace(
     this.proxy_id_session = proxy_id_session;
     this.dn = dn;
     this.timestamp = timestamp;
-    this.request = request;
+    this.apiRequest = apiRequest;
     this.type.validate(this);
   }
   

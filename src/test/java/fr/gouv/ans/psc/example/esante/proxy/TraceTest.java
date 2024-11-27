@@ -399,8 +399,8 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
             .returnResult()
             .getResponseBody();
     final Trace trace = traces.get(0);
-    Assertions.assertEquals("GET", trace.request().methode());
-    Assertions.assertEquals("/carebear1", trace.request().path());
+    Assertions.assertEquals("GET", trace.apiRequest().methode());
+    Assertions.assertEquals("/carebear1", trace.apiRequest().path());
     Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
     Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
   }
@@ -434,8 +434,8 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
         .returnResult()
         .getResponseBody();
     final Trace trace = traces.get(0);
-    Assertions.assertEquals("POST", trace.request().methode());
-    Assertions.assertEquals("/carebear2", trace.request().path());
+    Assertions.assertEquals("POST", trace.apiRequest().methode());
+    Assertions.assertEquals("/carebear2", trace.apiRequest().path());
     Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
     Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
   }
@@ -469,8 +469,8 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
         .returnResult()
         .getResponseBody();
     final Trace trace = traces.get(0);
-    Assertions.assertEquals("PUT", trace.request().methode());
-    Assertions.assertEquals("/carebear2", trace.request().path());
+    Assertions.assertEquals("PUT", trace.apiRequest().methode());
+    Assertions.assertEquals("/carebear2", trace.apiRequest().path());
     Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
     Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
   }
@@ -504,8 +504,8 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
         .returnResult()
         .getResponseBody();
     final Trace trace = traces.get(0);
-    Assertions.assertEquals("PATCH", trace.request().methode());
-    Assertions.assertEquals("/carebear2", trace.request().path());
+    Assertions.assertEquals("PATCH", trace.apiRequest().methode());
+    Assertions.assertEquals("/carebear2", trace.apiRequest().path());
     Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
     Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
   }
@@ -539,8 +539,8 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
         .returnResult()
         .getResponseBody();
     final Trace trace = traces.get(0);
-    Assertions.assertEquals("DELETE", trace.request().methode());
-    Assertions.assertEquals("/carebear2", trace.request().path());
+    Assertions.assertEquals("DELETE", trace.apiRequest().methode());
+    Assertions.assertEquals("/carebear2", trace.apiRequest().path());
     Assertions.assertTrue(testBegin.isBefore(trace.timestamp()));
     Assertions.assertTrue(OffsetDateTime.now().isAfter(trace.timestamp()));
   }
