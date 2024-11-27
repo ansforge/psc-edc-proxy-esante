@@ -41,7 +41,8 @@ import org.springframework.web.util.UriBuilder;
 
 /**
  * La version initiale de cette suite de test a été mise en place pour tester le partage d'information 
- * entre la partie gateway (`/send`) et les autres contrôleurs.
+ * entre la partie gateway (`/send`) et les autres contrôleurs, et la mise en place automatiques 
+ * de comportement spécifique au prox sur la partie `/send`.
  * Elle teste désormais le sous-système des traces.
  *
  * @author edegenetais
