@@ -295,4 +295,49 @@ public class SessionTests extends AbstractProxyIntegrationTest {
             .expectStatus()
             .isEqualTo(HttpStatus.CONFLICT);
   }
+  
+  @Test
+  public void reconnectingAfterDisconnectingWorks() {
+    String sessionId = testClient
+            .post()
+            .uri((UriBuilder b) -> b.path("/connect").build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                Mono.just(
+                    new Connection(
+                        ID_NAT, 
+                        "00", 
+                        "client-with-cert", 
+                        "CARD")
+                ),
+                Connection.class
+            )
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(Session.class)
+            .returnResult().getResponseBody().proxySessionId();
+    
+    testClient.delete().uri("/disconnect")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange().expectStatus().is2xxSuccessful();
+    
+    testClient
+            .post()
+            .uri((UriBuilder b) -> b.path("/connect").build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                Mono.just(
+                    new Connection(
+                        ID_NAT, 
+                        "00", 
+                        "client-with-cert", 
+                        "CARD")
+                ),
+                Connection.class
+            )
+            .exchange()
+            .expectStatus()
+            .isOk();
+  }
 }
