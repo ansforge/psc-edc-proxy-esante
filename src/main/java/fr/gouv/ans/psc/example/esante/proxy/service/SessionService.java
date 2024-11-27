@@ -57,4 +57,8 @@ public class SessionService {
   public void registerSession(String clientId, String nationalId) {
     registry.add(buildSessionKey(clientId, nationalId));
   }
+  
+  public void unRegisterSession(String clientId, String nationalId) {
+    registry.remove(buildSessionKey(clientId, nationalId));
+  }
 }

@@ -132,6 +132,8 @@ public class SessionController {
         BackendAuthentication backendAuth = webSession.getAttribute(SessionAttributes.BACKEND_AUTH_ATTR);
         this.backendAuthService.wipe(backendAuth);
         
+        this.sessionSrv.unRegisterSession(clientId, webSession.getAttribute(SessionAttributes.NATIONAL_ID));
+        
         return sessionEnd.block();
       };
       return Mono.fromCallable(sessionDestroyer);
