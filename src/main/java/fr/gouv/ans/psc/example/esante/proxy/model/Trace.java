@@ -38,7 +38,6 @@ public record Trace(
     List<Integer> ports,
     String proxy_id_session,
     String dn,
-    OffsetDateTime timestamp,// FIXME : s'assurer que ceci permet un affichage conforme à date-time pour conformité à l'API
     Request request
 ){
 
