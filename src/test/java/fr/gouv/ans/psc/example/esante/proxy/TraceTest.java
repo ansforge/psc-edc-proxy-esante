@@ -40,12 +40,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.util.UriBuilder;
 
 /**
- * Cette suite de tests vise à valider la mise en place de comportements globaux sur l'endpoint send
- * (aka : nous n'avons pas besoin d'ajouter explicitement le contenu à la configuration).
- *
- * Ceci évitera que de laisser les comportements importants à la merci de la configuration du proxy.
- * Le cobaye choisi est (unde ébauche grossière de) le fonctionnalité de trace. 
- * Il en résulte que ce test devra évoluer quand les traces définitives seront développées.
+ * La version initiale de cette suite de test a été mise en place pour tester le partage d'information 
+ * entre la partie gateway (`/send`) et les autres contrôleurs.
+ * Elle teste désormais le sous-système des traces.
  *
  * @author edegenetais
  */
