@@ -29,14 +29,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Ce service sert à contrôler divers aspects des sessions (abence de doublons,
- * rafraichissement...).
+ * Ce service sert à contrôler l'unicité des sessions.
  *
  * @author edegenetais
  */
 @Component
-public class SessionService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(SessionService.class);
+public class ProxySessionRegistry {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProxySessionRegistry.class);
   
   private Set<String> registry=new HashSet<>();
   

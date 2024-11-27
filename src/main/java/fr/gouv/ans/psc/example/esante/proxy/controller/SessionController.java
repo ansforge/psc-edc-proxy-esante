@@ -32,7 +32,7 @@ import fr.gouv.ans.psc.example.esante.proxy.service.BaseTraceData;
 import fr.gouv.ans.psc.example.esante.proxy.service.CIBASession;
 import fr.gouv.ans.psc.example.esante.proxy.service.PSCSessionService;
 import fr.gouv.ans.psc.example.esante.proxy.service.SessionConflict;
-import fr.gouv.ans.psc.example.esante.proxy.service.SessionService;
+import fr.gouv.ans.psc.example.esante.proxy.service.ProxySessionRegistry;
 import fr.gouv.ans.psc.example.esante.proxy.service.TraceService;
 import java.util.concurrent.Callable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +54,13 @@ public class SessionController {
   private final PSCSessionService cibaService;
   private final BackendAuthenticationService backendAuthService;
   private final TraceService traceSrv;
-  private final SessionService sessionSrv;
+  private final ProxySessionRegistry sessionSrv;
   
   public SessionController(
       @Autowired PSCSessionService cibaService,
       @Autowired BackendAuthenticationService backendAuthService,
       @Autowired TraceService traceSrv,
-      @Autowired SessionService sessionSrv
+      @Autowired ProxySessionRegistry sessionSrv
   ) {
     this.cibaService = cibaService;
     this.backendAuthService = backendAuthService;
