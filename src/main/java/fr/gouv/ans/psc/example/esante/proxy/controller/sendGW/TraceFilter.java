@@ -22,19 +22,18 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller.sendGW;
 
+import fr.gouv.ans.psc.example.esante.proxy.controller.TraceHelper;
 import fr.gouv.ans.psc.example.esante.proxy.model.Request;
 import fr.gouv.ans.psc.example.esante.proxy.model.TraceType;
+import fr.gouv.ans.psc.example.esante.proxy.service.BaseTraceData;
 import fr.gouv.ans.psc.example.esante.proxy.service.TechnicalFailure;
 import fr.gouv.ans.psc.example.esante.proxy.service.TraceService;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -43,7 +42,7 @@ import reactor.core.publisher.Mono;
 /**
  * @author edegenetais
  */
-@Component
+@Component("gwTraceFilter")
 public class TraceFilter implements GlobalFilter {
   private TraceService traceSrv;
 
@@ -54,31 +53,16 @@ public class TraceFilter implements GlobalFilter {
   @Override
   public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
     try {
-      final ServerHttpRequest request = exchange.getRequest();
-      final String requestMethod = request.getMethod().name();
-      final String requestPath = request.getPath().value();
+      BaseTraceData traceData = TraceHelper.getBaseTraceData(exchange);
       
-      final String sourceAddress;
-      final List<Integer> sourcePorts;
-      if(request.getHeaders().containsKey("X-Forwarded-For")) {
-        sourceAddress = request.getHeaders().get("X-Forwarded-For").getFirst();
-        sourcePorts = List.of();
-      } else {
-        sourceAddress = request.getRemoteAddress().getAddress().toString();
-        final ArrayList<Integer> portList = new ArrayList<>();
-        if(request.getRemoteAddress().getPort()!=0) {
-          portList.add(request.getRemoteAddress().getPort());
-        }
-        sourcePorts = portList;
-      }
-      
+      final String requestPath = exchange.getRequest().getPath().value();
       final Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
       final String nomApiPsc = route.getId();
 
-      final Request newRequest = new Request(nomApiPsc, requestMethod, requestPath);
+      final Request newRequest = new Request(nomApiPsc, traceData.requestMethod(), requestPath);
       
       final WebSession session = exchange.getSession().toFuture().get();
-      traceSrv.record( TraceType.SEND,session, sourceAddress, sourcePorts, newRequest);
+      traceSrv.record( TraceType.SEND,session, traceData.remoteAddress(), traceData.sourcePorts(), newRequest);
       
       return chain.filter(exchange);
     } catch (InterruptedException ex) {

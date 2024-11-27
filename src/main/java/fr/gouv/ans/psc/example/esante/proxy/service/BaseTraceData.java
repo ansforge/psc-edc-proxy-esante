@@ -20,33 +20,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy;
+package fr.gouv.ans.psc.example.esante.proxy.service;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import java.util.List;
 
 /**
- * Cette suite de test vise à valider le bon fonctionnement d'un contrôleur codé à côté de la gateway.
- * Par ailleurs, ce type de contrôleur est utile lors de déploiments cloud.
- * 
  * @author edegenetais
  */
-@SpringBootTest(classes = {EsanteProxyApplication.class})
-@AutoConfigureWebTestClient
-public class CheckEndpointTest extends AbstractProxyIntegrationTest {
- 
-  @Test
-  public void testCheckAlive(){
-    testClient
-        .get()
-        .uri("/check/alive")
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody(String.class)
-        .isEqualTo("OK");
-  }
+public record BaseTraceData(List<Integer> sourcePorts, String remoteAddress, String requestMethod) {
+  
 }
