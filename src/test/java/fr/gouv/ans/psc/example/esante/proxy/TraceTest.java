@@ -191,7 +191,7 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
         .post()
         .uri("/connect")
         .bodyValue(new Connection(ID_NAT, "42", badClientId, "CARD"))
-        .exchange().expectStatus().is5xxServerError();
+        .exchange().expectStatus().is4xxClientError();
     
     List<Trace> traces =
         testClient
