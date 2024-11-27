@@ -22,39 +22,38 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller;
 
-import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
-import fr.gouv.ans.psc.example.esante.proxy.service.TraceService;
-import java.time.OffsetDateTime;
+import fr.gouv.ans.psc.example.esante.proxy.service.BaseTraceData;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Ce contrôleur propose le service getTrace défini par la spécification.
  *
  * @author edegenetais
  */
-@RestController
-public class TraceController {
-  private TraceService traceSrv;
-
-  public TraceController(@Autowired TraceService traceSrv) {
-    this.traceSrv = traceSrv;
-  }
+public class TraceHelper {
+  public static final String BASE_TRACE_DATA_ATTR="fr.gouv.ans.psc.example.esante.proxy.controller.BaseTraceData";
   
-
-  @GetMapping("/traces")
-  public Flux<Trace> gettraces(@RequestParam("start") OffsetDateTime startDate, @RequestParam(required = false, name = "end") OffsetDateTime end) {
-    final List<Trace> traceStoreList = traceSrv.getTraces();
-    final OffsetDateTime effectiveEnd = Objects.requireNonNullElse(end, OffsetDateTime.now());
-    return Flux.fromStream(
-        traceStoreList.stream()
-            .filter(t -> startDate.isBefore(t.timestamp()))
-            .filter(t -> effectiveEnd.isAfter(t.timestamp())));
+  public static BaseTraceData getBaseTraceData(ServerWebExchange exchange) {
+    final ServerHttpRequest request = exchange.getRequest();
+      final String requestMethod = request.getMethod().name();
+      
+      
+      final String sourceAddress;
+      final List<Integer> sourcePorts;
+      if(request.getHeaders().containsKey("X-Forwarded-For")) {
+        sourceAddress = request.getHeaders().get("X-Forwarded-For").getFirst();
+        sourcePorts = List.of();
+      } else {
+        sourceAddress = request.getRemoteAddress().getAddress().toString();
+        final ArrayList<Integer> portList = new ArrayList<>();
+        if(request.getRemoteAddress().getPort()!=0) {
+          portList.add(request.getRemoteAddress().getPort());
+        }
+        sourcePorts = portList;
+      }
+      
+      return new BaseTraceData(sourcePorts, sourceAddress, requestMethod);
   }
-
 }

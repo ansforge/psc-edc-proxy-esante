@@ -20,39 +20,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy.model;
+package fr.gouv.ans.psc.example.esante.proxy.service;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
- * Élément de trace produit par le système.
- * 
  * @author edegenetais
  */
-public record Trace(
-    TraceType type,
-    String clientId,
-    String IdRPPS,
-    String ipAddress,
-    List<Integer> ports,
-    String proxy_id_session,
-    String dn,
-    OffsetDateTime timestamp,// FIXME : s'assurer que ceci permet un affichage conforme à date-time pour conformité à l'API
-    Request request
-){
-
-  public Trace(TraceType type,String clientId, String IdRPPS, String ipAddress, List<Integer> ports, String proxy_id_session, String dn, OffsetDateTime timestamp, Request request) {
-    this.type = type;
-    this.clientId = clientId;
-    this.IdRPPS = IdRPPS;
-    this.ipAddress = ipAddress;
-    this.ports = ports;
-    this.proxy_id_session = proxy_id_session;
-    this.dn = dn;
-    this.timestamp = timestamp;
-    this.request = request;
-    this.type.validate(this);
-  }
+public record BaseTraceData(List<Integer> sourcePorts, String remoteAddress, String requestMethod) {
   
 }

@@ -36,10 +36,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
  */
 @SpringBootTest(classes = {EsanteProxyApplication.class})
 @AutoConfigureWebTestClient
-public class CheckEndpointTest {
-  @Autowired
-  private WebTestClient testClient;
-  
+public class CheckEndpointTest extends AbstractProxyIntegrationTest {
+ 
   @Test
   public void testCheckAlive(){
     testClient
