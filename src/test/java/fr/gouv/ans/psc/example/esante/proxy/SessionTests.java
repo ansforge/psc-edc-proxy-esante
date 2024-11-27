@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
@@ -255,4 +256,43 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     Assertions.assertEquals(expectedSessionState,session.sessionState());
   }
   
+  @Test
+  public void tryingToReconnectWithAlreadyConnectedNatioanlIdAndClientIdIs409() {
+    testClient
+            .post()
+            .uri((UriBuilder b) -> b.path("/connect").build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                Mono.just(
+                    new Connection(
+                        ID_NAT, 
+                        "00", 
+                        "client-with-cert", 
+                        "CARD")
+                ),
+                Connection.class
+            )
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(Session.class);
+    
+    testClient
+            .post()
+            .uri((UriBuilder b) -> b.path("/connect").build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                Mono.just(
+                    new Connection(
+                        ID_NAT, 
+                        "00", 
+                        "client-with-cert", 
+                        "CARD")
+                ),
+                Connection.class
+            )
+            .exchange()
+            .expectStatus()
+            .isEqualTo(HttpStatus.CONFLICT);
+  }
 }
