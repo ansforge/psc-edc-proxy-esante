@@ -86,6 +86,9 @@ public class PSCSessionService {
     OIDCProviderMetadata providerMetadata = getMetadata();
 
     final Credential credential = this.cfg.getSecret(clientId);
+    if(credential==null) {
+      throw new UnknownClientId(clientId);
+    }
 
     LOGGER.debug("Client id {}, found credential for auth type {}",clientId,credential.type());
 
