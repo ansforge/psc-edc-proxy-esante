@@ -49,6 +49,16 @@
               }
             }
           },
+          "304": {
+            "description": "User session already active",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/session"
+                }
+              }
+			}
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -80,35 +90,6 @@
           },
           "404": {
             "description": "User National ID or Software Client ID Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "metadata": {
-                      "type": "object",
-                      "properties": {
-                        "nationalId": {
-                          "type": "object"
-                        },
-                        "clientID": {
-                          "type": "object"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict, User session already active",
             "content": {
               "application/json": {
                 "schema": {
