@@ -27,7 +27,7 @@
           "Connect"
         ],
         "summary": "connect",
-        "description": "Connect the user with its sofware to the Proxy e-Sante, returns a proxy_session_id",
+        "description": "Connect the user with its sofware to the Proxy e-Sante, returns a session object. The session id is returned in a cookie named proxy_session_id. (see securitySchemes)",
         "operationId": "post-connect",
         "requestBody": {
           "content": {
@@ -45,6 +45,14 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/session"
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "proxy_session_id=496fe9d6-9b81-11ef-adf1-4bdf50bfb5a6; Path=/"
                 }
               }
             }
@@ -133,11 +141,16 @@
     },
     "/disconnect": {
       "delete": {
+        "security": [
+          {
+            "cookieAuth": []      
+          }
+        ],
         "tags": [
           "Disconnect"
         ],
         "summary": "disconnect",
-        "description": "Disconnect the user from the Proxy e-Sante",
+        "description": "Disconnect the user from the Proxy e-Sante (also erases the  proxy_session_id cookie)",
         "operationId": "delete-disconnect",
         "parameters": [
           {
@@ -198,6 +211,11 @@
       }
     },
     "/send": {
+      "security": [
+        {
+          "cookieAuth": []      
+        }
+      ],
       "get": {
         "tags": [
           "Send"
@@ -250,6 +268,11 @@
         ]
       },
       "post": {
+      "security": [
+        {
+          "cookieAuth": []      
+        }
+      ],
         "tags": [
           "Send"
         ],
@@ -310,6 +333,11 @@
         ]
       },
       "delete": {
+        "security": [
+          {
+            "cookieAuth": []      
+          }
+        ],
         "tags": [
           "Send"
         ],
@@ -361,6 +389,11 @@
         ]
       },
       "put": {
+        "security": [
+          {
+            "cookieAuth": []      
+          }
+        ],
         "tags": [
           "Send"
         ],
@@ -421,6 +454,11 @@
         ]
       },
       "patch": {
+        "security": [
+          {
+            "cookieAuth": []      
+          }
+        ],
         "tags": [
           "Send"
         ],
@@ -549,6 +587,13 @@
     }
   ],
   "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "proxy_session_id"
+      }  
+    },
     "schemas": {
       "connection": {
         "type": "object",
