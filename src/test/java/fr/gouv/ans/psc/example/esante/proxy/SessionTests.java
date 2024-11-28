@@ -26,6 +26,7 @@ import com.github.tomakehurst.wiremock.client.BasicCredentials;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.nimbusds.jwt.JWTParser;
 import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
+import fr.gouv.ans.psc.example.esante.proxy.model.ErrorDescriptor;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import java.text.ParseException;
 import org.junit.jupiter.api.Assertions;
@@ -275,6 +276,24 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+  }
+  
+  @Test
+  public void connectingWithUnknownClientIdGivesExpectedErrorPayload() {
+    final String unknownClientId = "unknown_client";
+    ErrorDescriptor payload = testClient
+        .post()
+        .uri("/connect")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(new Connection(ID_NAT, "00", unknownClientId, "CARD")), Connection.class)
+        .exchange()
+        .expectBody(ErrorDescriptor.class)
+        .returnResult().getResponseBody();
+
+    Assertions.assertEquals("404", payload.code());
+    Assertions.assertEquals("User National ID or Software Client ID Not Found", payload.message());
+    Assertions.assertEquals(ID_NAT, payload.metadata().nationalId());
+    Assertions.assertEquals(unknownClientId, payload.metadata().clientId());
   }
   
   private void killSessionIfAny(Session session) {
