@@ -78,7 +78,7 @@
                         "nationalId": {
                           "type": "object"
                         },
-                        "clientID": {
+                        "clientId": {
                           "type": "object"
                         }
                       }
@@ -107,7 +107,7 @@
                         "nationalId": {
                           "type": "object"
                         },
-                        "clientID": {
+                        "clientId": {
                           "type": "object"
                         }
                       }
@@ -173,7 +173,7 @@
                         "nationalId": {
                           "type": "object"
                         },
-                        "clientID": {
+                        "clientId": {
                           "type": "object"
                         }
                       }
