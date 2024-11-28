@@ -29,7 +29,7 @@ package fr.gouv.ans.psc.example.esante.proxy.service;
 public class FunctionalError extends RuntimeException {
 
   public static enum Category {
-    NOT_FOUND
+    NOT_FOUND,UNAUTHORIZED
   }
   public final Category category;
   public final String clientId;

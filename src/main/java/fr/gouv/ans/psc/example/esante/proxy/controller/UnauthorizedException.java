@@ -20,10 +20,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy;
+package fr.gouv.ans.psc.example.esante.proxy.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import fr.gouv.ans.psc.example.esante.proxy.service.FunctionalError;
 
 /**
  * Le proxy ne peut être appelé sans session. Cette exception signale une tentative de requête sans
@@ -31,11 +30,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  *
  * @author edegenetais
  */
-@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-public class UnauthorizedException extends RuntimeException {
+public class UnauthorizedException extends FunctionalError {
 
   public UnauthorizedException(String message) {
-    super(message);
+    super(Category.UNAUTHORIZED,message,null,null);
   }
   
 }

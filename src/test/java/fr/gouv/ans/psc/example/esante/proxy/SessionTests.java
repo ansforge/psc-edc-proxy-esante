@@ -130,6 +130,21 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   }
   
   @Test
+  public void callingDisconnectWithBogusSessionGivesExpectedErrorPayload() {
+    ErrorDescriptor error =
+        testClient
+            .delete()
+            .uri(b -> b.path("/disconnect").build())
+            .cookie(SESSION_COOKIE_NAME, "this_is_bogus")
+            .exchange()
+            .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("401", error.code());
+    Assertions.assertEquals("Session ID not found.", error.message());
+    // Pas de métadonnées sur ce cas d'erreur, puisqu'elles ne peuvent être extraites que de la session, qui n'est ici pas disponible.
+  }
+  
+  @Test
   public void callingDisconnectWithRealSessionGives200() {
     Session session = getSession(testClient);
     testClient

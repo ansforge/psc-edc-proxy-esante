@@ -50,9 +50,10 @@ public class DescriptorExceptionHandler extends ResponseEntityExceptionHandler {
   public ResponseEntity<ErrorDescriptor> handleUnknownClientId(FunctionalError ex) {
     HttpStatusCode status = switch(ex.category){
           case NOT_FOUND -> HttpStatusCode.valueOf(404);
+          case UNAUTHORIZED -> HttpStatusCode.valueOf(401);
           default -> throw new IllegalArgumentException("Unknown category "+ex.category);
     };
-    return new ResponseEntity<ErrorDescriptor>(
+    return new ResponseEntity<>(
         new ErrorDescriptor(Integer.toString(status.value()), ex.getMessage(), new Metadata(ex.nationalId, ex.clientId)),
         status
     );
