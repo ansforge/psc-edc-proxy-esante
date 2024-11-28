@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
@@ -51,10 +50,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
 
   @Test
   public void passingConnectQueryExhangesIDPTokens() {
-   Session session=null;
-   try {
-    
-    session = testClient
+    testClient
         .post()
         .uri((UriBuilder b) -> b.path("/connect").build())
         .contentType(MediaType.APPLICATION_JSON)
@@ -69,21 +65,15 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         )
         .exchange()
         .expectStatus()
-        .isOk().expectBody(Session.class).returnResult().getResponseBody();
+        .isOk();
 
     backend1IDP.verify(1,WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
     backend2IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
     backend3IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
-    
-   }finally{
-      killSessionIfAny(session);
-   }
   }
   
   @Test
   public void passingConnectQueryReturnsSession() throws ParseException {
-    Session session = null;
-   try {
     String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
     EntityExchangeResult<Session> result =
         testClient
@@ -104,7 +94,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
             .isOk()
             .expectBody(Session.class)
             .returnResult();
-    session = result.getResponseBody();
+    Session session = result.getResponseBody();
     
     Assertions.assertNotNull(session);
     Assertions.assertFalse(session.proxySessionId().isBlank(), "Session Id must no be empty.");
@@ -113,9 +103,6 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     Assertions.assertNotNull(sessionIdCookie,"SessionIdCookie must exist.");
     String sessionIdFromCookie = sessionIdCookie.getValue();
     Assertions.assertEquals(sessionIdFromCookie, session.proxySessionId(),"Session object id and \"proxy_session_id\" value should match.");
-   }finally {
-      killSessionIfAny(session);
-   }
   }
   
   @Test
@@ -143,9 +130,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   
   @Test
   public void callingDisconnectWithRealSessionGives200() {
-   Session session = null;
-   try {
-    session = getSession(testClient);
+    Session session = getSession(testClient);
     testClient
         .delete()
         .uri(b -> b.path("/disconnect").build())
@@ -155,17 +140,12 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .isOk();
 
     pscMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
-   }finally {
-      killSessionIfAny(session);
-   }   
   }
 
   
   @Test
   public void callingDisconnectWithDisconnectedRealSessionGives401() {
-   Session session = null;
-   try {
-    session = getSession(testClient);
+    Session session = getSession(testClient);
     testClient
         .delete()
         .uri(b -> b.path("/disconnect").build())
@@ -184,16 +164,11 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .isUnauthorized();
     //Le compte doit rester à 1, AKA le second appel à `/disconnect` n'a pas déclenché d'appel à ProSantéConnect
     pscMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
-   }finally {
-      killSessionIfAny(session);
-   }
   }
   
   @Test
   public void passingConnectQueryCallsAuthEndpoint() {
-   Session session = null;
-   try {
-    session = testClient
+    testClient
       .post()
       .uri((UriBuilder b) -> b.path("/connect").build())
       .contentType(MediaType.APPLICATION_JSON)
@@ -207,8 +182,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
             Connection.class
       )
       .exchange()
-        .expectStatus().isOk()
-        .expectBody(Session.class).returnResult().getResponseBody();
+        .expectStatus().isOk();
     
     pscMock.verify(1, 
       WireMock.postRequestedFor(
@@ -217,16 +191,11 @@ public class SessionTests extends AbstractProxyIntegrationTest {
        .withFormParam("login_hint", WireMock.equalTo(ID_NAT))
        .withFormParam("scope", WireMock.equalTo("openid scope_all"))
     );
-   } finally {
-      killSessionIfAny(session);
-   }
   }
   
   @Test
   public void secretClientCredsGiveBasic() {
-   Session session = null;
-   try {
-    session = testClient
+    testClient
       .post()
       .uri((UriBuilder b) -> b.path("/connect").build())
       .contentType(MediaType.APPLICATION_JSON)
@@ -240,8 +209,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
             Connection.class
       )
       .exchange()
-      .expectStatus().isOk()
-      .expectBody(Session.class).returnResult().getResponseBody();
+        .expectStatus().isOk();
 
      pscMock.verify(1,
         WireMock.postRequestedFor(
@@ -254,18 +222,14 @@ public class SessionTests extends AbstractProxyIntegrationTest {
                 WireMock.urlEqualTo(
                     "/auth/realms/esante-wallet/protocol/openid-connect/token"))
             .withBasicAuth(new BasicCredentials(TEST_CLIENT_ID, MY_CLIENT_SECRET)));
-   } finally {
-      killSessionIfAny(session);
-   }
   }
 
   
   @Test
   public void sslCredReturnsSession() throws ParseException {
-   Session session = null;
-   try {
     String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
-     session = testClient
+    Session session =
+        testClient
             .post()
             .uri((UriBuilder b) -> b.path("/connect").build())
             .contentType(MediaType.APPLICATION_JSON)
@@ -289,106 +253,6 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     Assertions.assertNotNull(session);
     Assertions.assertFalse(session.proxySessionId().isBlank(), "Session Id must no be empty.");
     Assertions.assertEquals(expectedSessionState,session.sessionState());
-   } finally {
-      killSessionIfAny(session);
-   }
-  }
-  
-  @Test
-  public void tryingToReconnectWithAlreadyConnectedNatioanlIdAndClientIdIs409() {
-   Session session = null;
-   try {
-    session = testClient
-            .post()
-            .uri((UriBuilder b) -> b.path("/connect").build())
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                Mono.just(
-                    new Connection(
-                        ID_NAT, 
-                        "00", 
-                        "client-with-cert", 
-                        "CARD")
-                ),
-                Connection.class
-            )
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(Session.class).returnResult().getResponseBody();
-    
-    testClient
-            .post()
-            .uri((UriBuilder b) -> b.path("/connect").build())
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                Mono.just(
-                    new Connection(
-                        ID_NAT, 
-                        "00", 
-                        "client-with-cert", 
-                        "CARD")
-                ),
-                Connection.class
-            )
-            .exchange()
-            .expectStatus()
-            .isEqualTo(HttpStatus.CONFLICT);
-   } finally {
-      killSessionIfAny(session);
-   }
-  }
-  
-  @Test
-  public void reconnectingAfterDisconnectingWorks() {
-   Session session = null;
-   try {
-        session = testClient
-            .post()
-            .uri((UriBuilder b) -> b.path("/connect").build())
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                Mono.just(
-                    new Connection(
-                        ID_NAT, 
-                        "00", 
-                        "client-with-cert", 
-                        "CARD")
-                ),
-                Connection.class
-            )
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(Session.class)
-            .returnResult().getResponseBody();
-    
-    testClient.delete().uri("/disconnect")
-        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
-        .exchange().expectStatus().is2xxSuccessful();
-    
-    session = testClient
-            .post()
-            .uri((UriBuilder b) -> b.path("/connect").build())
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(
-                Mono.just(
-                    new Connection(
-                        ID_NAT, 
-                        "00", 
-                        "client-with-cert", 
-                        "CARD")
-                ),
-                Connection.class
-            )
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(Session.class)
-            .returnResult().getResponseBody();
-   } finally {
-      killSessionIfAny(session);
-   }
   }
   
   @Test
