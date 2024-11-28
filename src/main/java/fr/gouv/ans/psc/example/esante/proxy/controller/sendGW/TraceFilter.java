@@ -34,6 +34,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -43,6 +44,7 @@ import reactor.core.publisher.Mono;
  * @author edegenetais
  */
 @Component("gwTraceFilter")
+@Order(10)
 public class TraceFilter implements GlobalFilter {
   private TraceService traceSrv;
 

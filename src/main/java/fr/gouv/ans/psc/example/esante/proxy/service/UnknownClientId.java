@@ -20,39 +20,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy.model;
+package fr.gouv.ans.psc.example.esante.proxy.service;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import java.time.OffsetDateTime;
-import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Élément de trace produit par le système.
- * 
  * @author edegenetais
  */
-public record Trace(
-    TraceType type,
-    String clientId,
-    String IdRPPS,
-    String ipAddress,
-    List<Integer> ports,
-    String proxy_id_session,
-    String dn,
-    OffsetDateTime timestamp,
-    @JsonInclude(JsonInclude.Include.NON_NULL) Request apiRequest) {
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class UnknownClientId extends RuntimeException {
 
-  public Trace(TraceType type,String clientId, String IdRPPS, String ipAddress, List<Integer> ports, String proxy_id_session, String dn, OffsetDateTime timestamp, Request apiRequest) {
-    this.type = type;
-    this.clientId = clientId;
-    this.IdRPPS = IdRPPS;
-    this.ipAddress = ipAddress;
-    this.ports = ports;
-    this.proxy_id_session = proxy_id_session;
-    this.dn = dn;
-    this.timestamp = timestamp;
-    this.apiRequest = apiRequest;
-    this.type.validate(this);
+  public UnknownClientId(String clientId) {
+    super("Client id inconnu : "+clientId);
   }
-  
+
 }

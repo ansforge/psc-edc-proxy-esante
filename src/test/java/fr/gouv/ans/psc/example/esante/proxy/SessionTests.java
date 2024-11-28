@@ -391,6 +391,28 @@ public class SessionTests extends AbstractProxyIntegrationTest {
    }
   }
   
+  @Test
+  public void connectingWithUnknownClientIdGives404() {
+    testClient
+        .post()
+        .uri("/connect")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+            Mono.just(
+                new Connection(
+                    ID_NAT,
+                    "00",
+                    "unknown_client",
+                    "CARD"
+                )
+            ),
+            Connection.class
+        )
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+  
   private void killSessionIfAny(Session session) {
     if(session!=null) {
       killSession(testClient, session.proxySessionId());

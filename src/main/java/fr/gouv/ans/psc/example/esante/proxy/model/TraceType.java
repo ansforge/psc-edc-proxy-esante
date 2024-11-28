@@ -32,7 +32,7 @@ public enum TraceType {
   CONNECT_SUCCESS {
     @Override
     public void validateImpl(Trace t) {
-      if(t.request()!=null) {
+      if(t.apiRequest()!=null) {
         throw new IllegalArgumentException("No request data allowed in " + name()+" traces.");
       }
       Objects.requireNonNull(t.clientId(), "clientId is mandatory");
@@ -42,21 +42,21 @@ public enum TraceType {
   , CONNECT_FAILURE{
     @Override
     protected void validateImpl(Trace t) {
-      if(t.request()!=null) {
+      if(t.apiRequest()!=null) {
         throw new IllegalArgumentException("No request data allowed in " + name()+" traces.");
       }
     }
   }, SEND {
     @Override
     protected void validateImpl(Trace t) {
-      Objects.requireNonNull(t.request(),"request is mandatory");
+      Objects.requireNonNull(t.apiRequest(),"request is mandatory");
       Objects.requireNonNull(t.clientId(), "clientId is mandatory");
       Objects.requireNonNull(t.proxy_id_session(), "proxy_id_session is mandatory");
     }
   }, DISCONNECT {
     @Override
     protected void validateImpl(Trace t) {
-      if(t.request()!=null) {
+      if(t.apiRequest()!=null) {
         throw new IllegalArgumentException("No request data allowed in " + name()+" traces.");
       }
       Objects.requireNonNull(t.clientId(), "clientId is mandatory");
