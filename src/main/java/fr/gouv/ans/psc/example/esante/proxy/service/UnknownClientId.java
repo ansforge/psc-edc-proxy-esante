@@ -22,17 +22,12 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.service;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
 /**
  * @author edegenetais
  */
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class UnknownClientId extends RuntimeException {
-
-  public UnknownClientId(String clientId) {
-    super("Client id inconnu : "+clientId);
+public class UnknownClientId extends FunctionalError {
+  public UnknownClientId(String clientId, String nationalId) {
+    super(Category.NOT_FOUND,"User National ID or Software Client ID Not Found.",clientId,nationalId);
   }
 
 }

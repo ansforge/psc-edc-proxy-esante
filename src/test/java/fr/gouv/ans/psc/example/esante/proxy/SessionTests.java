@@ -291,7 +291,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .returnResult().getResponseBody();
 
     Assertions.assertEquals("404", payload.code());
-    Assertions.assertEquals("User National ID or Software Client ID Not Found", payload.message());
+    Assertions.assertEquals("User National ID or Software Client ID Not Found.", payload.message());
     Assertions.assertEquals(ID_NAT, payload.metadata().nationalId());
     Assertions.assertEquals(unknownClientId, payload.metadata().clientId());
   }

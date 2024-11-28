@@ -53,7 +53,7 @@ public class DescriptorExceptionHandler extends ResponseEntityExceptionHandler {
           default -> throw new IllegalArgumentException("Unknown category "+ex.category);
     };
     return new ResponseEntity<ErrorDescriptor>(
-        new ErrorDescriptor(Integer.toString(status.value()), "User National ID or Software Client ID Not Found", new Metadata(ex.nationalId, ex.clientId)),
+        new ErrorDescriptor(Integer.toString(status.value()), ex.getMessage(), new Metadata(ex.nationalId, ex.clientId)),
         status
     );
   }

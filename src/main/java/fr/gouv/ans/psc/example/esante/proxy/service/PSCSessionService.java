@@ -87,7 +87,7 @@ public class PSCSessionService {
 
     final Credential credential = this.cfg.getSecret(clientId);
     if(credential==null) {
-      throw new UnknownClientId(clientId);
+      throw new UnknownClientId(clientId,nationalId);
     }
 
     LOGGER.debug("Client id {}, found credential for auth type {}",clientId,credential.type());
