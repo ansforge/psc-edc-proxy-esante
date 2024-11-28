@@ -25,7 +25,6 @@ package fr.gouv.ans.psc.example.esante.proxy;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
 import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
-import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
 import fr.gouv.ans.psc.example.esante.proxy.model.TraceType;
 import java.time.OffsetDateTime;
@@ -65,12 +64,8 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
   
   @Test
   public void connectOnMTLSClientHasDnInTrace() {
-    OffsetDateTime testBegin = OffsetDateTime.now();
-    testClient
-        .post()
-        .uri("/connect")
-        .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
-        .exchange().expectStatus().is2xxSuccessful();
+   OffsetDateTime testBegin = OffsetDateTime.now();
+   try(SessionScope scope=new SessionScope("client-with-cert")) {
     
     List<Trace> traces =
         testClient
@@ -90,6 +85,7 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
     final X500Name effectiveDN = new X500Name(traces.getFirst().dn());
     final X500Name expectedDn = new X500Name("C = FR, ST = Ile-de-France, L = Montrouge, O = Henix, OU = EDC-test-CA, CN = client.edc.proxy.1, emailAddress = \"edegenetais+client.edc.proxy.1@henix.fr\"");
     Assertions.assertEquals(expectedDn, effectiveDN);
+   }
   }
   
   @Test
@@ -108,26 +104,16 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
   
   @Test
   public void sendOnMTLSClientHasDnInTrace() {
+    try(SessionScope scope = new SessionScope("client-with-cert")) {
     
-    Session session =
-        testClient
-            .post()
-            .uri("/connect")
-            .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
-            .exchange()
-            .expectStatus()
-            .is2xxSuccessful()
-            .expectBody(Session.class)
-            .returnResult().getResponseBody();
-
     OffsetDateTime testBegin = OffsetDateTime.now();
     testClient.get().uri("/send/backend-1/carebear1")
-        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .cookie(SESSION_COOKIE_NAME, scope.getSessionId())
         .exchange().expectStatus().is2xxSuccessful();
     OffsetDateTime testEnd = OffsetDateTime.now();
     
     testClient.delete().uri("/disconnect")
-        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .cookie(SESSION_COOKIE_NAME, scope.getSessionId())
         .exchange().expectStatus().isOk();
 
     List<Trace> traces =
@@ -150,30 +136,21 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
     final X500Name effectiveDN = new X500Name(traces.getFirst().dn());
     final X500Name expectedDn = new X500Name("C = FR, ST = Ile-de-France, L = Montrouge, O = Henix, OU = EDC-test-CA, CN = client.edc.proxy.1, emailAddress = \"edegenetais+client.edc.proxy.1@henix.fr\"");
     Assertions.assertEquals(expectedDn, effectiveDN);
+    }
   }
   
   @Test
   public void sendOnSessionHasId() {
+   try(SessionScope scope = new SessionScope("client-with-cert")) {
     
-    Session session =
-        testClient
-            .post()
-            .uri("/connect")
-            .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
-            .exchange()
-            .expectStatus()
-            .is2xxSuccessful()
-            .expectBody(Session.class)
-            .returnResult().getResponseBody();
-
     OffsetDateTime testBegin = OffsetDateTime.now();
     testClient.get().uri("/send/backend-1/carebear1")
-        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .cookie(SESSION_COOKIE_NAME, scope.getSessionId())
         .exchange().expectStatus().is2xxSuccessful();
     OffsetDateTime testEnd = OffsetDateTime.now();
     
     testClient.delete().uri("/disconnect")
-        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .cookie(SESSION_COOKIE_NAME, scope.getSessionId())
         .exchange().expectStatus().isOk();
 
     List<Trace> traces =
@@ -192,7 +169,8 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
             .hasSize(1)
             .returnResult()
             .getResponseBody();
-    Assertions.assertEquals(session.proxySessionId(), traces.getFirst().proxy_id_session());
+    Assertions.assertEquals(scope.getSessionId(), traces.getFirst().proxy_id_session());
+   }
   }
   
   @Test
@@ -227,13 +205,10 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
   
   @Test
   public void getConnectTrace() {
-    OffsetDateTime testBegin = OffsetDateTime.now();
-    testClient
-        .post()
-        .uri("/connect")
-        .bodyValue(new Connection(ID_NAT, "42", TEST_CLIENT_ID, "CARD"))
-        .exchange().expectStatus().is2xxSuccessful();
-
+   killSession(testClient, sessionId);// Il faut fermer la session pour la rouvrir manuellement et savoir quand l'appel a eu lieu
+   OffsetDateTime testBegin = OffsetDateTime.now();    
+   try(SessionScope scope=new SessionScope(TEST_CLIENT_ID)) {
+        
     List<Trace> traces =
         testClient
             .get()
@@ -250,6 +225,7 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
             .returnResult()
             .getResponseBody();
     Assertions.assertEquals(TraceType.CONNECT_SUCCESS, traces.getFirst().type());
+   }
   }
   
   @Test
