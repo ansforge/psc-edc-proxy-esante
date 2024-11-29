@@ -68,6 +68,16 @@ spring:
           metadata:
 # URL du fournisseur d'identité de ce backend, auprès duquel sera effectué l'échange du token PSC contre un token popur le backend.
             token-exchange-endpoint: http://localhost:8086/realms/signsessiondata/protocol/openid-connect/token
+        - id: backend-indisponible
+          uri: https://localhost:4242/
+          predicates:
+          - Path=/send/backend-indisponible/{endpoint}
+          filters:
+          - SetPath=/{endpoint}
+          metadata:
+# URL du fournisseur d'identité de ce backend, auprès duquel sera effectué l'échange du token PSC contre un token popur le backend.
+            token-exchange-endpoint: http://localhost:8086/realms/signsessiondata/protocol/openid-connect/token
+        
 psc:
   discoveryURL: http://localhost:8443/auth/realms/esante-wallet/.well-known/wallet-openid-configuration
   audience: proxy-exemple

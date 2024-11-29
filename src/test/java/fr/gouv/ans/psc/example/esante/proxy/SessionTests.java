@@ -222,6 +222,33 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   }
   
   @Test
+  public void unavailablePSCReturns503() {
+    pscMock.stubFor(
+        WireMock.any(
+                WireMock.urlEqualTo(
+                    "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
+            .willReturn(WireMock.aResponse().withStatus(503)));
+    
+    testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+            Mono.just(
+                new Connection(
+                    ID_NAT,
+                    "00", 
+                    TEST_CLIENT_ID, 
+                    "CARD")
+                ),
+                Connection.class
+            )
+        .exchange()
+        .expectStatus()
+        .isEqualTo(503);
+  }
+  
+  @Test
   public void callingDisconnectWithNoSessionGives401() {
     testClient
         .delete()
