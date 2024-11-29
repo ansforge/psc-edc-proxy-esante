@@ -54,7 +54,7 @@ public class DescriptorExceptionHandler extends ResponseEntityExceptionHandler {
   }
   
   @ExceptionHandler({FunctionalError.class})
-  public ResponseEntity<ErrorDescriptor> handleUnknownClientId(FunctionalError ex) {
+  public ResponseEntity<ErrorDescriptor> handleFunctionalError(FunctionalError ex) {
     HttpStatusCode status = switch(ex.category){
           case NOT_FOUND -> HttpStatusCode.valueOf(404);
           case UNAUTHORIZED -> HttpStatusCode.valueOf(401);
