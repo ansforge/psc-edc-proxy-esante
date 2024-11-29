@@ -26,6 +26,8 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.matching.UrlPattern;
+import fr.gouv.ans.psc.example.esante.proxy.model.ErrorDescriptor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -120,6 +122,96 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
         .isUnauthorized();
 
     backend2.verify(WireMock.exactly(0), WireMock.anyRequestedFor(UrlPattern.ANY));
+  }
+  
+  @Test
+  public void sendGETWithoutSessionGivesExpectedPayload() {
+    final String reponseBody = "{\"status\": \"OK\"}";
+    backend1.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
+
+    ErrorDescriptor error =
+        testClient
+            .get()
+            .uri("/send/backend-1/rsc1")
+            .exchange()
+            .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("401", error.code());
+    Assertions.assertEquals("No session fouund.", error.message());
+  }
+  
+  @Test
+  public void sendPOSTWithoutSessionGivesExpectedPayload() {
+    final String reponseBody = "{\"status\": \"OK\"}";
+    backend1.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
+
+    ErrorDescriptor error =
+        testClient
+            .post()
+            .uri("/send/backend-1/rsc1")
+            .bodyValue("{\"type\":\"payload\"}")
+            .exchange()
+            .expectBody(ErrorDescriptor.class)
+            .returnResult()
+            .getResponseBody();
+
+    Assertions.assertEquals("401", error.code());
+    Assertions.assertEquals("No session fouund.", error.message());
+  }
+  
+  @Test
+  public void sendPUTWithoutSessionGivesExpectedPayload() {
+    final String reponseBody = "{\"status\": \"OK\"}";
+    backend1.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
+
+    ErrorDescriptor error =
+        testClient
+            .put()
+            .uri("/send/backend-1/rsc1")
+            .bodyValue("{\"type\":\"payload\"}")
+            .exchange()
+            .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("401", error.code());
+    Assertions.assertEquals("No session fouund.", error.message());
+  }
+  
+  @Test
+  public void sendPATCHWithoutSessionGivesExpectedPayload() {
+    final String reponseBody = "{\"status\": \"OK\"}";
+    backend1.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
+
+    ErrorDescriptor error =
+        testClient
+            .patch()
+            .uri("/send/backend-1/rsc1")
+            .bodyValue("{\"type\":\"payload\"}")
+            .exchange()
+            .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("401", error.code());
+    Assertions.assertEquals("No session fouund.", error.message());
+  }
+  
+  @Test
+  public void sendDELETEWithoutSessionGivesExpectedPayload() {
+    final String reponseBody = "{\"status\": \"OK\"}";
+    backend1.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
+
+    ErrorDescriptor error =
+        testClient
+            .delete()
+            .uri("/send/backend-1/rsc1")
+            .exchange()
+            .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("401", error.code());
+    Assertions.assertEquals("No session fouund.", error.message());
   }
   
   @Test

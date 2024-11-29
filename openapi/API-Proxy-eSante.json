@@ -166,17 +166,6 @@
                     },
                     "message": {
                       "type": "string"
-                    },
-                    "metadata": {
-                      "type": "object",
-                      "properties": {
-                        "nationalId": {
-                          "type": "object"
-                        },
-                        "clientId": {
-                          "type": "object"
-                        }
-                      }
                     }
                   }
                 }
@@ -228,7 +217,22 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Session ID not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal Server Error"
@@ -288,7 +292,22 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "No session found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal Server Error"
@@ -339,7 +358,22 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "No session found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal Server Error"
@@ -399,7 +433,22 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "No session found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal Server Error"
@@ -459,7 +508,22 @@
             }
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "No session found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal Server Error"
