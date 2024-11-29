@@ -70,7 +70,11 @@ public class SessionTests extends AbstractProxyIntegrationTest {
 
     backend1IDP.verify(1,WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
     backend2IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
-    backend3IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
+    /*
+     * L'IDP 3 est mutualisé avec le backend volontairement non-fonctionnel qui sert à tester 
+     * le retour d'erreur de connexion. Il est donc sollicité deux fois et non une comme les autres.
+     */
+    backend3IDP.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
   }
   
   @Test
