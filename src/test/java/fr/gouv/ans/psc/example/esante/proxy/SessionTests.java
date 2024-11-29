@@ -74,6 +74,121 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   }
   
   @Test
+  public void invalidChannelOnConnectGiveErrorDescriptor() {
+    ErrorDescriptor error =  testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+                  Mono.just(
+                      new Connection(
+                          ID_NAT,
+                          "00", 
+                          TEST_CLIENT_ID, 
+                          "INVALID")),
+                  Connection.class
+            )
+        .exchange()
+        .expectStatus().isBadRequest()
+        .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("400", error.code());
+    Assertions.assertTrue(error.message().contains("channel value INVALID is invalid"));
+  }
+  
+  @Test
+  public void missingChannelOnConnectGiveErrorDescriptor() {
+    ErrorDescriptor error =  testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+                  Mono.just(
+                      new Connection(
+                          ID_NAT,
+                          "00", 
+                          TEST_CLIENT_ID, 
+                          null)),
+                  Connection.class
+            )
+        .exchange()
+        .expectStatus().isBadRequest()
+        .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("400", error.code());
+    Assertions.assertTrue(error.message().contains("channel is missing"));
+  }
+  
+  @Test
+  public void missingIdNationalOnConnectGiveErrorDescriptor() {
+    ErrorDescriptor error =  testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+                  Mono.just(
+                      new Connection(
+                          null,
+                          "00", 
+                          TEST_CLIENT_ID, 
+                          "CARD")),
+                  Connection.class
+            )
+        .exchange()
+        .expectStatus().isBadRequest()
+        .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("400", error.code());
+    Assertions.assertTrue(error.message().contains("nationalId is missing"));
+  }
+  
+  @Test
+  public void missingbindingMessageOnConnectGiveErrorDescriptor() {
+    ErrorDescriptor error =  testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+                  Mono.just(
+                      new Connection(
+                          ID_NAT,
+                          null, 
+                          TEST_CLIENT_ID, 
+                          "CARD")),
+                  Connection.class
+            )
+        .exchange()
+        .expectStatus().isBadRequest()
+        .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("400", error.code());
+    Assertions.assertTrue(error.message().contains("bindingMessage is missing"));
+  }
+  
+  @Test
+  public void missingClientIdOnConnectGiveErrorDescriptor() {
+    ErrorDescriptor error =  testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+                  Mono.just(
+                      new Connection(
+                          ID_NAT,
+                          "00", 
+                          null, 
+                          "CARD")),
+                  Connection.class
+            )
+        .exchange()
+        .expectStatus().isBadRequest()
+        .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("400", error.code());
+    Assertions.assertTrue(error.message().contains("clientId is missing"));
+  }
+  
+  @Test
   public void passingConnectQueryReturnsSession() throws ParseException {
     String expectedSessionState=JWTParser.parse(TEST_ACCESS_TOKEN).getJWTClaimsSet().getStringClaim("session_state");
     EntityExchangeResult<Session> result =
