@@ -67,7 +67,7 @@ public class SessionController {
       @RequestBody Connection connection, 
       @RequestAttribute(name = TraceHelper.BASE_TRACE_DATA_ATTR) BaseTraceData baseTraceData, 
       WebSession webSession) {
-
+    connection.validate();
     Callable<Session> sessionSupplier =
         () -> {
           try {

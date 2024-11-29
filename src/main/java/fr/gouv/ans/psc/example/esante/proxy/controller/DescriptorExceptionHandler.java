@@ -51,6 +51,7 @@ public class DescriptorExceptionHandler extends ResponseEntityExceptionHandler {
     HttpStatusCode status = switch(ex.category){
           case NOT_FOUND -> HttpStatusCode.valueOf(404);
           case UNAUTHORIZED -> HttpStatusCode.valueOf(401);
+          case INVALID_REQUEST -> HttpStatusCode.valueOf(400);
           default -> throw new IllegalArgumentException("Unknown category "+ex.category);
     };
     return new ResponseEntity<>(

@@ -22,10 +22,15 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Descripteur d'erreur.
+ *
  * @author edegenetais
  */
-public record ErrorDescriptor (String code, String message, Metadata metadata){
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ErrorDescriptor(String code, String message, Metadata metadata) {
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   public static record Metadata(String nationalId, String clientId){}
 }
