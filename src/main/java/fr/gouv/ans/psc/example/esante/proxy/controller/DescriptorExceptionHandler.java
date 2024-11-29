@@ -26,6 +26,7 @@ import fr.gouv.ans.psc.example.esante.proxy.model.ErrorDescriptor;
 import fr.gouv.ans.psc.example.esante.proxy.model.ErrorDescriptor.Metadata;
 import fr.gouv.ans.psc.example.esante.proxy.service.FunctionalError;
 import static fr.gouv.ans.psc.example.esante.proxy.service.FunctionalError.Category.NOT_FOUND;
+import fr.gouv.ans.psc.example.esante.proxy.service.UnavailableBackend;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatusCode;
@@ -45,6 +46,12 @@ public class DescriptorExceptionHandler extends ResponseEntityExceptionHandler {
     LoggerFactory.getLogger(DescriptorExceptionHandler.class).debug("Error payload handler created.");
   }
   
+  
+  
+  @ExceptionHandler({UnavailableBackend.class})
+  public ResponseEntity<Object> handleUnavailableBackend(UnavailableBackend e) {
+    return new ResponseEntity<>(HttpStatusCode.valueOf(e.errorCode));
+  }
   
   @ExceptionHandler({FunctionalError.class})
   public ResponseEntity<ErrorDescriptor> handleUnknownClientId(FunctionalError ex) {
