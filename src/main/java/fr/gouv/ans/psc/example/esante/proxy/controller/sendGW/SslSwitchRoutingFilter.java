@@ -22,7 +22,7 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller.sendGW;
 
-import fr.gouv.ans.psc.example.esante.proxy.UnauthorizedException;
+import fr.gouv.ans.psc.example.esante.proxy.controller.UnauthorizedException;
 import fr.gouv.ans.psc.example.esante.proxy.config.SendGatewayClientConfig;
 import fr.gouv.ans.psc.example.esante.proxy.controller.SessionAttributes;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;

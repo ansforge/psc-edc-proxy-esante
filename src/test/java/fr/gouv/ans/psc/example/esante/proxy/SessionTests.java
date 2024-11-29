@@ -26,6 +26,7 @@ import com.github.tomakehurst.wiremock.client.BasicCredentials;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.nimbusds.jwt.JWTParser;
 import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
+import fr.gouv.ans.psc.example.esante.proxy.model.ErrorDescriptor;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import java.text.ParseException;
 import org.junit.jupiter.api.Assertions;
@@ -126,6 +127,21 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .expectStatus()
         .isUnauthorized();
     pscMock.verify(0, WireMock.postRequestedFor(WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/logout")));
+  }
+  
+  @Test
+  public void callingDisconnectWithBogusSessionGivesExpectedErrorPayload() {
+    ErrorDescriptor error =
+        testClient
+            .delete()
+            .uri(b -> b.path("/disconnect").build())
+            .cookie(SESSION_COOKIE_NAME, "this_is_bogus")
+            .exchange()
+            .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+
+    Assertions.assertEquals("401", error.code());
+    Assertions.assertEquals("Session ID not found.", error.message());
+    // Pas de métadonnées sur ce cas d'erreur, puisqu'elles ne peuvent être extraites que de la session, qui n'est ici pas disponible.
   }
   
   @Test
@@ -275,6 +291,24 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+  }
+  
+  @Test
+  public void connectingWithUnknownClientIdGivesExpectedErrorPayload() {
+    final String unknownClientId = "unknown_client";
+    ErrorDescriptor payload = testClient
+        .post()
+        .uri("/connect")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(new Connection(ID_NAT, "00", unknownClientId, "CARD")), Connection.class)
+        .exchange()
+        .expectBody(ErrorDescriptor.class)
+        .returnResult().getResponseBody();
+
+    Assertions.assertEquals("404", payload.code());
+    Assertions.assertEquals("User National ID or Software Client ID Not Found.", payload.message());
+    Assertions.assertEquals(ID_NAT, payload.metadata().nationalId());
+    Assertions.assertEquals(unknownClientId, payload.metadata().clientId());
   }
   
   private void killSessionIfAny(Session session) {

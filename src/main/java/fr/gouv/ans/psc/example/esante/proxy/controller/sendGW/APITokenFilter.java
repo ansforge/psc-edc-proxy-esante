@@ -22,7 +22,7 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller.sendGW;
 
-import fr.gouv.ans.psc.example.esante.proxy.UnauthorizedException;
+import fr.gouv.ans.psc.example.esante.proxy.controller.UnauthorizedException;
 import fr.gouv.ans.psc.example.esante.proxy.controller.SessionAttributes;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAccess;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
@@ -56,7 +56,7 @@ public class APITokenFilter implements GlobalFilter {
       
       WebSession session = exchange.getSession().toFuture().get();
       if(session==null || !session.isStarted()) {
-        throw new UnauthorizedException("Pas de session");
+        throw new UnauthorizedException("No session fouund.");
       }
       BackendAuthentication backendAuth = session.getAttribute(SessionAttributes.BACKEND_AUTH_ATTR);
       Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);

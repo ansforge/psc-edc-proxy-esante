@@ -20,14 +20,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy.service;
+package fr.gouv.ans.psc.example.esante.proxy.controller;
+
+import fr.gouv.ans.psc.example.esante.proxy.service.FunctionalError;
 
 /**
+ * Le proxy ne peut être appelé sans session. Cette exception signale une tentative de requête sans
+ * session valide.
+ *
  * @author edegenetais
  */
-public class UnknownClientId extends FunctionalError {
-  public UnknownClientId(String clientId, String nationalId) {
-    super(Category.NOT_FOUND,"User National ID or Software Client ID Not Found.",clientId,nationalId);
-  }
+public class UnauthorizedException extends FunctionalError {
 
+  public UnauthorizedException(String message) {
+    super(Category.UNAUTHORIZED,message,null,null);
+  }
+  
 }

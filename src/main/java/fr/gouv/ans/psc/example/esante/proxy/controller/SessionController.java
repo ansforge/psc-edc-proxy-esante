@@ -22,7 +22,6 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller;
 
-import fr.gouv.ans.psc.example.esante.proxy.UnauthorizedException;
 import fr.gouv.ans.psc.example.esante.proxy.model.Connection;
 import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import fr.gouv.ans.psc.example.esante.proxy.model.TraceType;
@@ -111,7 +110,7 @@ public class SessionController {
       @RequestAttribute(name = TraceHelper.BASE_TRACE_DATA_ATTR) BaseTraceData baseTraceData) {
     
     if(webSession==null || !webSession.isStarted()) {
-      return Mono.error(new UnauthorizedException("Pas de session"));
+      return Mono.error(new UnauthorizedException("Session ID not found."));
     } else {
       this.traceSrv.record(TraceType.DISCONNECT, webSession, baseTraceData.remoteAddress(), baseTraceData.sourcePorts(), null);
       Callable<Void> sessionDestroyer = () -> {

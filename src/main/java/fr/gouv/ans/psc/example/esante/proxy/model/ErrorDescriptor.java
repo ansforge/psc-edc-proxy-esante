@@ -20,14 +20,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy.service;
+package fr.gouv.ans.psc.example.esante.proxy.model;
 
 /**
+ * Descripteur d'erreur.
  * @author edegenetais
  */
-public class UnknownClientId extends FunctionalError {
-  public UnknownClientId(String clientId, String nationalId) {
-    super(Category.NOT_FOUND,"User National ID or Software Client ID Not Found.",clientId,nationalId);
-  }
-
+public record ErrorDescriptor (String code, String message, Metadata metadata){
+  public static record Metadata(String nationalId, String clientId){}
 }
