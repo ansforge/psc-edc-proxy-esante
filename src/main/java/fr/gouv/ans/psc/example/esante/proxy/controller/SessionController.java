@@ -67,7 +67,9 @@ public class SessionController {
       @RequestBody Connection connection, 
       @RequestAttribute(name = TraceHelper.BASE_TRACE_DATA_ATTR) BaseTraceData baseTraceData, 
       WebSession webSession) {
-
+    if(webSession!=null && webSession.isStarted()) {
+      throw new Reconnect(webSession.getAttribute(SessionAttributes.PROXY_API_SESSION));
+    }
     Callable<Session> sessionSupplier =
         () -> {
           try {
@@ -93,7 +95,9 @@ public class SessionController {
                 baseTraceData.remoteAddress(),
                 baseTraceData.sourcePorts(),
                 null);
-            return new Session(sessionId, cibaSession.sessionState());
+            final Session session = new Session(sessionId, cibaSession.sessionState());
+            webSession.getAttributes().put(SessionAttributes.PROXY_API_SESSION, session);
+            return session;
           } catch (RuntimeException re) {
             this.traceSrv.record(
                 TraceType.CONNECT_FAILURE, webSession, baseTraceData.remoteAddress(), baseTraceData.sourcePorts(), null);

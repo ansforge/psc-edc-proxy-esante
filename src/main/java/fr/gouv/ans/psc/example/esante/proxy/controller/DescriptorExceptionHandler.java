@@ -24,6 +24,7 @@ package fr.gouv.ans.psc.example.esante.proxy.controller;
 
 import fr.gouv.ans.psc.example.esante.proxy.model.ErrorDescriptor;
 import fr.gouv.ans.psc.example.esante.proxy.model.ErrorDescriptor.Metadata;
+import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import fr.gouv.ans.psc.example.esante.proxy.service.FunctionalError;
 import static fr.gouv.ans.psc.example.esante.proxy.service.FunctionalError.Category.NOT_FOUND;
 import org.slf4j.LoggerFactory;
@@ -44,8 +45,11 @@ public class DescriptorExceptionHandler extends ResponseEntityExceptionHandler {
   public DescriptorExceptionHandler() {
     LoggerFactory.getLogger(DescriptorExceptionHandler.class).debug("Error payload handler created.");
   }
-  
-  
+
+  @ExceptionHandler({Reconnect.class})
+  public ResponseEntity<Session> handleReconnect(Reconnect recon) {
+    return new ResponseEntity<>(recon.session,HttpStatusCode.valueOf(304));
+  }
   @ExceptionHandler({FunctionalError.class})
   public ResponseEntity<ErrorDescriptor> handleUnknownClientId(FunctionalError ex) {
     HttpStatusCode status = switch(ex.category){
