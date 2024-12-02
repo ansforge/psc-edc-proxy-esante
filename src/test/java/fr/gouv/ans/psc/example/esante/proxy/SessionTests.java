@@ -536,6 +536,50 @@ public class SessionTests extends AbstractProxyIntegrationTest {
         .doesNotExist(SESSION_COOKIE_NAME);
   }
   
+  @Test
+  public void pscTriggered401ErrorPayloadShouldBeAPICompliant() {
+      pscMock.stubFor(
+        WireMock.post(
+                WireMock.urlEqualTo(
+                    "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
+        .willReturn(
+            WireMock.unauthorized()
+        )
+    );
+
+    ErrorDescriptor error = testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(new Connection(ID_NAT, "00", TEST_CLIENT_ID, "CARD")), Connection.class)
+        .exchange()
+        .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+    
+    Assertions.assertEquals("401", error.code());
+    Assertions.assertFalse(error.message().isBlank());
+    Assertions.assertEquals(ID_NAT, error.metadata().nationalId());
+    Assertions.assertEquals(TEST_CLIENT_ID, error.metadata().clientId());
+  }
+  
+  @Test
+  public void tokenExchangeTriggered401ErrorPayloadShouldBeAPICompliant() {
+      backend1IDP.stubFor(WireMock.post(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI))
+          .willReturn(WireMock.unauthorized()));
+
+    ErrorDescriptor error = testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(new Connection(ID_NAT, "00", TEST_CLIENT_ID, "CARD")), Connection.class)
+        .exchange()
+        .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
+    
+    Assertions.assertEquals("401", error.code());
+    Assertions.assertFalse(error.message().isBlank());
+    Assertions.assertEquals(ID_NAT, error.metadata().nationalId());
+    Assertions.assertEquals(TEST_CLIENT_ID, error.metadata().clientId());
+  }
+  
   private void killSessionIfAny(Session session) {
     if(session!=null) {
       killSession(testClient, session.proxySessionId());

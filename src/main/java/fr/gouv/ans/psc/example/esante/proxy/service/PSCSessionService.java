@@ -149,13 +149,13 @@ public class PSCSessionService {
         throw new UnavailableBackend(response.toErrorResponse().getErrorObject().getHTTPStatusCode(),"Pro Santé Connect");
       } else {
         LOGGER.error("Authentication failed : {}",tokenResponse.toErrorResponse().toJSONObject());
-        throw new AuthenticationFailure(tokenResponse.toErrorResponse());
+        throw new AuthenticationFailure(tokenResponse.toErrorResponse(),clientId,nationalId);
       }
     } else if(response.toErrorResponse().getErrorObject().getHTTPStatusCode() >= 502 && response.toErrorResponse().getErrorObject().getHTTPStatusCode() <= 504) {
       throw new UnavailableBackend(response.toErrorResponse().getErrorObject().getHTTPStatusCode(),"Pro Santé Connect");
     } else {
       LOGGER.error("Authentication failed : {}",response.toErrorResponse().toJSONObject());
-      throw new AuthenticationFailure(response.toErrorResponse());
+      throw new AuthenticationFailure(response.toErrorResponse(),clientId,nationalId);
     }
   }
 

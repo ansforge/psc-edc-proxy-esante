@@ -22,6 +22,7 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.service;
 
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
@@ -94,7 +95,14 @@ public class TokenExchangeProcess {
             .error(
                 "Token exchange for {} failed for client {}. {}",b.id(),clientId,
                 reponse.toErrorResponse().toJSONObject());
-        throw new AuthenticationFailure(reponse.toErrorResponse());
+        String nationalId=null;
+        try {
+          JWT accessToken = session.idTokenAsJWT();
+          nationalId = accessToken.getJWTClaimsSet().getStringClaim("SubjectNameID");
+        } catch(Exception e) {
+          LOGGER.warn("Failed to extract nationalId from id token while reporting token exchange failure.",e);
+        }
+        throw new AuthenticationFailure(reponse.toErrorResponse(),clientId,nationalId);
       }
     } catch (IOException | ParseException ex) {
       throw new TechnicalFailure("Failed to call ID server for token echange for " + clientId, ex);

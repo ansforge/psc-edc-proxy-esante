@@ -51,8 +51,8 @@ public class AbstractProxyIntegrationTest {
   protected static final String TEST_FORWARDED_FOR = "127.0.0.3";
   protected static final String AUT_REQ_ID = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im15LWF1dGgtcmVxLWlkLTI1NSJ9.zCIf0ngT65O3wXeWsUetWasqAYBNsq1_m-wEUc_QhkQ";
   protected static final String ID_NAT = "500000001815646/CPAT00045";
-  protected static final String TEST_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJzZXNzaW9uX3N0YXRlIjoic2Vzc2lvbi1zdGF0ZS0yNTYteHh4In0.ut7H8Xpxz-6HobZdhH9UF6o5Hdzuv_hdvur-VhDAf4Y";
-  protected static final String TEST_ID_TOKEN = TEST_ACCESS_TOKEN; //FIXME later
+  protected static final String TEST_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJTdWJqZWN0TmFtZUlEIjoiNTAwMDAwMDAxODE1NjQ2L0NQQVQwMDA0NSIsInNlc3Npb25fc3RhdGUiOiJzZXNzaW9uLXN0YXRlLTI1Ni14eHgifQ.x6diw2iSK4eEbJVcyZOicoqX5v8ou8acnczOVRqLF50";
+  protected static final String TEST_ID_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJTdWJqZWN0TmFtZUlEIjoiNTAwMDAwMDAxODE1NjQ2L0NQQVQwMDA0NSIsInNlc3Npb25fc3RhdGUiOiJzZXNzaW9uLXN0YXRlLTI1Ni14eHgifQ.x6diw2iSK4eEbJVcyZOicoqX5v8ou8acnczOVRqLF50";
   protected static final String TEST_CLIENT_ID = "client-id-of-test";
   protected static final String REFRESH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoX2lkIjoibXktYXV0aC1yZXEtaWQtMjU1In0._kXdSg6CSbCGidMzlw2CWoZ37QeSLSg9WyLja1ToBs4";
   protected static final String SESSION_COOKIE_NAME = "proxy_session_id";
