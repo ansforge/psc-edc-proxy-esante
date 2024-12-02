@@ -482,6 +482,29 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     backend3IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
   }
   
+  @Test
+  public void pasDeSessionActiveSiErreurConnect() {
+    pscMock.stubFor(
+        WireMock.post(
+                WireMock.urlEqualTo(
+                    "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
+        .willReturn(
+            WireMock.unauthorized()
+        )
+    );
+
+    testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(Mono.just(new Connection(ID_NAT, "00", TEST_CLIENT_ID, "CARD")), Connection.class)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(401)
+        .expectCookie()
+        .doesNotExist(SESSION_COOKIE_NAME);
+  }
+  
   private void killSessionIfAny(Session session) {
     if(session!=null) {
       killSession(testClient, session.proxySessionId());
