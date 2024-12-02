@@ -293,5 +293,16 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
       backend3.verify(WireMock.exactly(1), WireMock.getRequestedFor(WireMock.urlEqualTo("/rsc3")));
     }
   }
+  
+  @Test
+  public void unavailableBackendShouldTrigger503() {
+    testClient
+        .get()
+        .uri("/send/backend-indisponible/rsc2")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(503);
+  }
 
 }

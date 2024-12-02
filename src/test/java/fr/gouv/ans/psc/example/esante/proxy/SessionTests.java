@@ -70,7 +70,11 @@ public class SessionTests extends AbstractProxyIntegrationTest {
 
     backend1IDP.verify(1,WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
     backend2IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
-    backend3IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
+    /*
+     * L'IDP 3 est mutualisé avec le backend volontairement non-fonctionnel qui sert à tester 
+     * le retour d'erreur de connexion. Il est donc sollicité deux fois et non une comme les autres.
+     */
+    backend3IDP.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
   }
   
   @Test
@@ -219,6 +223,33 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     Assertions.assertNotNull(sessionIdCookie,"SessionIdCookie must exist.");
     String sessionIdFromCookie = sessionIdCookie.getValue();
     Assertions.assertEquals(sessionIdFromCookie, session.proxySessionId(),"Session object id and \"proxy_session_id\" value should match.");
+  }
+  
+  @Test
+  public void unavailablePSCReturns503() {
+    pscMock.stubFor(
+        WireMock.any(
+                WireMock.urlEqualTo(
+                    "/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth"))
+            .willReturn(WireMock.aResponse().withStatus(503)));
+    
+    testClient
+        .post()
+        .uri((UriBuilder b) -> b.path("/connect").build())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+            Mono.just(
+                new Connection(
+                    ID_NAT,
+                    "00", 
+                    TEST_CLIENT_ID, 
+                    "CARD")
+                ),
+                Connection.class
+            )
+        .exchange()
+        .expectStatus()
+        .isEqualTo(503);
   }
   
   @Test
@@ -479,7 +510,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     
     backend1IDP.verify(1,WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
     backend2IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
-    backend3IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
+    backend3IDP.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
   }
   
   private void killSessionIfAny(Session session) {

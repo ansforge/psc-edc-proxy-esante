@@ -86,6 +86,8 @@ public class TokenExchangeProcess {
         final Long renewalTime = Math.min(accessTokenLifetime, refreshTokenLifetime);
         BackendAccess access = new BackendAccess(accessToken, renewalTime, refreshToken);
         return access;
+      } else if(reponse.toErrorResponse().getErrorObject().getHTTPStatusCode() >= 502 && reponse.toErrorResponse().getErrorObject().getHTTPStatusCode()<=504) {
+        throw new UnavailableBackend(reponse.toErrorResponse().getErrorObject().getHTTPStatusCode(), b.id()+" token exchange");
       } else {
 
         LOGGER

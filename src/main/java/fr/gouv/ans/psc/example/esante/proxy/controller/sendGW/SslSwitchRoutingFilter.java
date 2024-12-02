@@ -28,11 +28,16 @@ import fr.gouv.ans.psc.example.esante.proxy.controller.SessionAttributes;
 import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
 import fr.gouv.ans.psc.example.esante.proxy.service.Credential;
 import fr.gouv.ans.psc.example.esante.proxy.service.TechnicalFailure;
+import fr.gouv.ans.psc.example.esante.proxy.service.UnavailableBackend;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.ssl.ApplicationProtocolNegotiator;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.resolver.dns.DnsErrorCauseException;
+import io.netty.resolver.dns.DnsNameResolverException;
+import java.net.ConnectException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLEngine;
@@ -60,6 +65,11 @@ import reactor.netty.http.client.HttpClient;
 @Component
 public class SslSwitchRoutingFilter extends NettyRoutingFilter {
   private static final Logger LOGGER = LoggerFactory.getLogger(SslSwitchRoutingFilter.class);
+  
+  private static final List<Class<? extends Throwable>> HANDLED_CLIENT_EX = List.of(
+      ConnectException.class,
+      DnsNameResolverException.class
+  );
   
   @Autowired
   private SendGatewayClientConfig cfg;
@@ -90,8 +100,21 @@ public class SslSwitchRoutingFilter extends NettyRoutingFilter {
       LOGGER.debug("Provided kmf : {} for credential {}",kmf,credential);
       final SslContext theCtx = sslBuilder.keyManager(kmf).build();
 
-      return defaultClient.secure(s ->
-              s.sslContext(new SslContextSpy(theCtx, session)));
+      return defaultClient
+          .secure(s -> s.sslContext(new SslContextSpy(theCtx, session)))
+          .doOnRequestError(
+              (c, e) -> {
+                Optional<Class<? extends Throwable>> matchingCause =
+                    HANDLED_CLIENT_EX.stream()
+                        .filter(exClass -> exClass.isInstance(e.getCause()))
+                        .findFirst();
+                if (matchingCause.isPresent()) {
+                  LOGGER.error("Backend call failure.", e);
+                  throw new UnavailableBackend(503, route.getId());
+                } else {
+                  LOGGER.error("Unhandled backend access error",e);
+                }
+              });
     } catch (InterruptedException | SSLException ex) {
       throw new TechnicalFailure("Échec du paramétrage SSL pour la connexion sortante.",ex);
     } catch (ExecutionException ex) {
