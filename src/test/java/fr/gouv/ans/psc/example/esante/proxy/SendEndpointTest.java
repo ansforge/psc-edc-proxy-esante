@@ -43,6 +43,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest {
   private static final String BACKEND2_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJzcmMiOiJiYWNrZW5kMklEUCJ9.WCYMgTi5cW3FBOUqUTa1TNwjSGCu8QQ0vRwQ-mQOFnk";
   private static final String BACKEND1_ACCESS_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJLZVFCMjgzXzNjY3dBTUZtWHBDYTRfbGhrZVl2VGFWZmxiU3FoSXkxUUJzIn0.eyJleHAiOjE3MzE5NTcxMTAsImlhdCI6MTczMTk0MjcxMCwianRpIjoiMTY5NGI3N2QtN2IzMi00NjVjLThkNjQtMjY5ODM5MzFmOWM3IiwiaXNzIjoiaHR0cHM6Ly9hdXRoLnNlcnZlci5hcGkuZWRjLXBzYy5lc2FudGUuZ291di5mci9yZWFsbXMvc2lnbnNlc3Npb25kYXRhIiwiYXVkIjpbImFjY291bnQiLCJhbnMtb2RjLWxwczEtYmFzIl0sInN1YiI6Ijc1ZDVmMGZmLTVmNGMtNGVkNi05NDVjLWM0M2IzMjdmYWM3OSIsInR5cCI6IkJlYXJlciIsImF6cCI6ImFucy1vZGMtbHBzMS1iYXMiLCJzZXNzaW9uX3N0YXRlIjoiMTg1NjE1NmEtMDM5OC00MmY2LWFlODEtYmQzNWI5ZDE3NDRiIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMtc2lnbnNlc3Npb25kYXRhIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSIsInNpZCI6IjE4NTYxNTZhLTAzOTgtNDJmNi1hZTgxLWJkMzViOWQxNzQ0YiIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6IktJVCBET0MwMDQyNzg2IiwiU3ViamVjdE5hbWVJRCI6Ijg5OTcwMDQyNzg2OSIsImNuZiI6eyJ4NXQjUzI1NiI6Ik1tSmpabUkzWldOa00yUTVZVGs1WmpjNE9UQm1OalZsT0RObU1ETXpPR1V3WVdWak5ETXpZVGhsT1RCa1lqVTFNMk14TmpVM1lqTXpNREUyWXpVek13PT0ifSwicHJlZmVycmVkX3VzZXJuYW1lIjoiODk5NzAwNDI3ODY5IiwiZ2l2ZW5fbmFtZSI6IktJVCIsImZhbWlseV9uYW1lIjoiRE9DMDA0Mjc4NiJ9.p8Irq3n9-l5LgkFeig1tHiPAhjdYFcsrclJecXWXj6raezquBbxFtQ70Wxj8mQBzFPqtJ0lGrrjTW4gSPqA2sHm3p5oy9Y6TiNQ7PTjx7w2DDWNkyPDhfjgFrAMcXYPtzh0LjI9rdpzayvNLHqH1oip0i5dlMY89JWS1BidPUAtMA_6QAJKO4SWvsD5d85OkRJZoW0eLsMjRqIWUKIggSxLgthQwpkN-uTyQBbMsZU14M1YvSBxKlzgpaTsukI4RSBiBRxJegJMGD6P4Dd5NnONrG7kRNKTOjUHDI821AAtntr1T-dCGPSF7o8vqZZvAP2YZ5WOp16DxeFHjWFoREw";
+  private static final String NO_SESSION_FOUND_ERR_MSG = "No session found.";
   
   private static final int BACKEND_M_TLS_PORT = 8083;
   
@@ -138,7 +139,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
             .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
 
     Assertions.assertEquals("401", error.code());
-    Assertions.assertEquals("No session fouund.", error.message());
+    Assertions.assertEquals(NO_SESSION_FOUND_ERR_MSG, error.message());
   }
   
   @Test
@@ -158,7 +159,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
             .getResponseBody();
 
     Assertions.assertEquals("401", error.code());
-    Assertions.assertEquals("No session fouund.", error.message());
+    Assertions.assertEquals(NO_SESSION_FOUND_ERR_MSG, error.message());
   }
   
   @Test
@@ -176,7 +177,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
             .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
 
     Assertions.assertEquals("401", error.code());
-    Assertions.assertEquals("No session fouund.", error.message());
+    Assertions.assertEquals(NO_SESSION_FOUND_ERR_MSG, error.message());
   }
   
   @Test
@@ -194,7 +195,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
             .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
 
     Assertions.assertEquals("401", error.code());
-    Assertions.assertEquals("No session fouund.", error.message());
+    Assertions.assertEquals(NO_SESSION_FOUND_ERR_MSG, error.message());
   }
   
   @Test
@@ -211,7 +212,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
             .expectBody(ErrorDescriptor.class).returnResult().getResponseBody();
 
     Assertions.assertEquals("401", error.code());
-    Assertions.assertEquals("No session fouund.", error.message());
+    Assertions.assertEquals(NO_SESSION_FOUND_ERR_MSG, error.message());
   }
   
   @Test
