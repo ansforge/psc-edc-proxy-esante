@@ -36,11 +36,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author edegenetais
  */
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
-public class AuthenticationFailure extends RuntimeException {
+public class AuthenticationFailure extends FunctionalError {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFailure.class);
 
-	public AuthenticationFailure(ErrorResponse response) {
-		super(parseError(response));
+	public AuthenticationFailure(ErrorResponse response,String clientId, String nationalId) {
+		super(Category.UNAUTHORIZED,parseError(response),clientId,nationalId);
 	}
 
 	private static String parseError(ErrorResponse response) {

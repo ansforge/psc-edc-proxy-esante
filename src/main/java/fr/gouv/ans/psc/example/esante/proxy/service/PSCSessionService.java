@@ -147,11 +147,11 @@ public class PSCSessionService {
         );
       } else {
         LOGGER.error("Authentication failed : {}",tokenResponse.toErrorResponse().toJSONObject());
-        throw new AuthenticationFailure(tokenResponse.toErrorResponse());
+        throw new AuthenticationFailure(tokenResponse.toErrorResponse(),clientId,nationalId);
       }
     } else {
       LOGGER.error("Authentication failed : {}",response.toErrorResponse().toJSONObject());
-      throw new AuthenticationFailure(response.toErrorResponse());
+      throw new AuthenticationFailure(response.toErrorResponse(),clientId,nationalId);
     }
   }
 
