@@ -22,17 +22,16 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller;
 
+import fr.gouv.ans.psc.example.esante.proxy.model.Session;
+
 /**
- * Définitions des attributs de session.
- * 
+ *
  * @author edegenetais
  */
-public final class SessionAttributes {
+public class Reconnect extends RuntimeException {
+  public final Session session;
+  public Reconnect(Session session) {
+    this.session=session;
+  }
 
-  public static final String CIBA_SESSION = "CIBA_sessionb";
-  public static final String BACKEND_AUTH_ATTR = "backend_auth";
-  public static final String CLIENT_ID = "client_id";
-  public static final String NATIONAL_ID = "national_id";
-  public static final String PROXY_API_SESSION = "proxy_api_session";
-  private SessionAttributes(){}
 }

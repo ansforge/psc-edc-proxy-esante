@@ -24,6 +24,7 @@ package fr.gouv.ans.psc.example.esante.proxy.controller;
 
 import fr.gouv.ans.psc.example.esante.proxy.model.ErrorDescriptor;
 import fr.gouv.ans.psc.example.esante.proxy.model.ErrorDescriptor.Metadata;
+import fr.gouv.ans.psc.example.esante.proxy.model.Session;
 import fr.gouv.ans.psc.example.esante.proxy.service.FunctionalError;
 import static fr.gouv.ans.psc.example.esante.proxy.service.FunctionalError.Category.NOT_FOUND;
 import fr.gouv.ans.psc.example.esante.proxy.service.UnavailableBackend;
@@ -52,7 +53,12 @@ public class DescriptorExceptionHandler extends ResponseEntityExceptionHandler {
   public ResponseEntity<Object> handleUnavailableBackend(UnavailableBackend e) {
     return new ResponseEntity<>(HttpStatusCode.valueOf(e.errorCode));
   }
-  
+
+  @ExceptionHandler({Reconnect.class})
+  public ResponseEntity<Session> handleReconnect(Reconnect recon) {
+    return new ResponseEntity<>(recon.session,HttpStatusCode.valueOf(304));
+  }
+
   @ExceptionHandler({FunctionalError.class})
   public ResponseEntity<ErrorDescriptor> handleFunctionalError(FunctionalError ex) {
     HttpStatusCode status = switch(ex.category){

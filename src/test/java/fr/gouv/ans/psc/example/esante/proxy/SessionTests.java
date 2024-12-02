@@ -457,6 +457,62 @@ public class SessionTests extends AbstractProxyIntegrationTest {
     Assertions.assertEquals(unknownClientId, payload.metadata().clientId());
   }
   
+  @Test
+  public void recyclageSessionSiDejaSession(){
+    Session session =
+        testClient
+            .post()
+            .uri((UriBuilder b) -> b.path("/connect").build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Mono.just(new Connection(ID_NAT, "00", TEST_CLIENT_ID, "CARD")), Connection.class)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(Session.class).returnResult().getResponseBody();
+    
+    pscMock.stubFor(
+        WireMock.post(
+                "/auth/realms/esante-wallet/protocol/openid-connect/token")
+            .willReturn(
+                WireMock.okJson(
+                    "{\"access_token\": \""
+                        + SessionTests.TEST_ACCESS_TOKEN
+                        + "\",\"expires_in\": 120,\"refresh_token\": \""
+                        + SessionTests.REFRESH_TOKEN
+                        + "\",\"refresh_expires_in\": 350,\"token_type\":\"Bearer\",\"id_token\":\""
+                        + SessionTests.TEST_ID_TOKEN
+                        + "\",\"scope\": \"openid ciba\", \"session_state\": \"session-state-512-xxx\"}")));
+
+    Session secondSession =
+        testClient
+            .post()
+            .uri((UriBuilder b) -> b.path("/connect").build())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(Mono.just(new Connection(ID_NAT, "00", TEST_CLIENT_ID, "CARD")), Connection.class)
+            .cookie("proxy_session_id", session.proxySessionId())
+            .exchange()
+            .expectStatus()
+            .isEqualTo(304)
+            .expectBody(Session.class)
+            .returnResult()
+            .getResponseBody();
+
+    Assertions.assertEquals(session.proxySessionId(), secondSession.proxySessionId());
+    Assertions.assertEquals(session.sessionState(), secondSession.sessionState());
+        
+    pscMock.verify(1, 
+      WireMock.postRequestedFor(
+        WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth")
+      ).withFormParam("binding_message", WireMock.equalTo("00"))
+       .withFormParam("login_hint", WireMock.equalTo(ID_NAT))
+       .withFormParam("scope", WireMock.equalTo("openid scope_all"))
+    );    
+    
+    backend1IDP.verify(1,WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
+    backend2IDP.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
+    backend3IDP.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo(TOKEN_EXCHANGE_URI)));
+  }
+  
   private void killSessionIfAny(Session session) {
     if(session!=null) {
       killSession(testClient, session.proxySessionId());
