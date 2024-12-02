@@ -67,6 +67,7 @@ public class SessionController {
       @RequestBody Connection connection, 
       @RequestAttribute(name = TraceHelper.BASE_TRACE_DATA_ATTR) BaseTraceData baseTraceData, 
       WebSession webSession) {
+    connection.validate();
     if(webSession!=null && webSession.isStarted()) {
       throw new Reconnect(webSession.getAttribute(SessionAttributes.PROXY_API_SESSION));
     }

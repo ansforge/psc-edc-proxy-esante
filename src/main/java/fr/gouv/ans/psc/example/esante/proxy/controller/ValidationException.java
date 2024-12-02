@@ -20,45 +20,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package fr.gouv.ans.psc.example.esante.proxy.model;
+package fr.gouv.ans.psc.example.esante.proxy.controller;
 
-import fr.gouv.ans.psc.example.esante.proxy.controller.ValidationException;
-import java.util.ArrayList;
-import java.util.List;
-import org.slf4j.LoggerFactory;
+import fr.gouv.ans.psc.example.esante.proxy.service.FunctionalError;
 
 /**
- * Contenu de la requête `/connect`.
  * @author edegenetais
  */
-public record Connection (
-    String nationalId,
-    String bindingMessage,
-    String clientId,
-    String channel
-    ){
-  public void validate() {
-    List<String> messages = new ArrayList<>();
+public class ValidationException extends FunctionalError {
 
-    if(nationalId==null) {
-      messages.add("nationalId is missing");
-    }
-    if(bindingMessage==null){
-      messages.add("bindingMessage is missing");
-    }
-    if(clientId==null) {
-      messages.add("clientId is missing");
-    }
-    if(channel==null) {
-      messages.add("channel is missing");
-    } else if(!List.of("CARD","MOBILE").contains(channel)) {
-      messages.add("channel value "+channel+" is invalid");
-    }
-    
-    if(messages.isEmpty()) {
-      LoggerFactory.getLogger(Connection.class).debug("Connection query payload valid.");
-    } else {
-      throw new ValidationException(messages.toString(), clientId, nationalId);
-    }
+  public ValidationException(String message, String clientId, String nationalId) {
+    super(Category.INVALID_REQUEST, message, clientId, nationalId);
   }
+
 }
