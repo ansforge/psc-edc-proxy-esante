@@ -100,6 +100,9 @@ public class SessionController {
             webSession.getAttributes().put(SessionAttributes.PROXY_API_SESSION, session);
             return session;
           } catch (RuntimeException re) {
+            if(webSession!=null) {
+              webSession.invalidate();
+            }
             this.traceSrv.record(
                 TraceType.CONNECT_FAILURE, webSession, baseTraceData.remoteAddress(), baseTraceData.sourcePorts(), null);
             throw re;
