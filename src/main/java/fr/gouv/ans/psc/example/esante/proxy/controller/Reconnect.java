@@ -22,16 +22,8 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller;
 
-import fr.gouv.ans.psc.example.esante.proxy.model.Session;
-
 /**
  *
  * @author edegenetais
  */
-public class Reconnect extends RuntimeException {
-  public final Session session;
-  public Reconnect(Session session) {
-    this.session=session;
-  }
-
-}
+public class Reconnect extends RuntimeException {}

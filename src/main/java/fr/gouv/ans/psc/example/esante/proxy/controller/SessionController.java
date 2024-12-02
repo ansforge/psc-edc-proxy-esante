@@ -69,7 +69,7 @@ public class SessionController {
       WebSession webSession) {
     connection.validate();
     if(webSession!=null && webSession.isStarted()) {
-      throw new Reconnect(webSession.getAttribute(SessionAttributes.PROXY_API_SESSION));
+      throw new Reconnect();
     }
     Callable<Session> sessionSupplier =
         () -> {
