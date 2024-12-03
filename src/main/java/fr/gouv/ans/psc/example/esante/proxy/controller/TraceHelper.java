@@ -22,11 +22,17 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.controller;
 
+import fr.gouv.ans.psc.example.esante.proxy.model.Session;
+import fr.gouv.ans.psc.example.esante.proxy.service.BackendAuthentication;
 import fr.gouv.ans.psc.example.esante.proxy.service.BaseTraceData;
+import fr.gouv.ans.psc.example.esante.proxy.service.SessionTraceData;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebSession;
 
 /**
  *
@@ -34,6 +40,8 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class TraceHelper {
   public static final String BASE_TRACE_DATA_ATTR="fr.gouv.ans.psc.example.esante.proxy.controller.BaseTraceData";
+  
+  private TraceHelper(){}
   
   public static BaseTraceData getBaseTraceData(ServerWebExchange exchange) {
     final ServerHttpRequest request = exchange.getRequest();
@@ -55,5 +63,30 @@ public class TraceHelper {
       }
       
       return new BaseTraceData(sourcePorts, sourceAddress, requestMethod);
+  }
+  
+  public static final SessionTraceData getSessionTraceData(WebSession session) {
+    final String clientId = session.getAttribute(SessionAttributes.CLIENT_ID);
+    final String nationalId = session.getAttribute(SessionAttributes.NATIONAL_ID);
+    final BackendAuthentication backendAuth = session.getAttribute(SessionAttributes.BACKEND_AUTH_ATTR);
+    final Session proxySession = session.getAttribute(SessionAttributes.PROXY_API_SESSION);
+    
+    Optional<X509Certificate> crt;
+    if(backendAuth==null) {
+      crt=Optional.empty();
+    } else {
+      crt = backendAuth.credential.getClientCert();
+    }
+    final String sessionState;
+    final String proxySessionId;
+    if(proxySession==null) {
+      sessionState=null;
+      proxySessionId=null;
+    } else {
+      sessionState = proxySession.sessionState();
+      proxySessionId = proxySession.proxySessionId();
+    }
+    
+    return new SessionTraceData(crt,clientId,nationalId, sessionState, proxySessionId);
   }
 }

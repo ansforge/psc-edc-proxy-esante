@@ -64,7 +64,11 @@ public class TraceFilter implements GlobalFilter {
       final Request newRequest = new Request(nomApiPsc, traceData.requestMethod(), requestPath);
       
       final WebSession session = exchange.getSession().toFuture().get();
-      traceSrv.record( TraceType.SEND,session, traceData.remoteAddress(), traceData.sourcePorts(), newRequest);
+      traceSrv.record(
+          TraceType.SEND,
+          TraceHelper.getSessionTraceData(session),
+          traceData, 
+          newRequest);
       
       return chain.filter(exchange);
     } catch (InterruptedException ex) {
