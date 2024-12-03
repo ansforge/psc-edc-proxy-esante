@@ -37,6 +37,19 @@ public enum TraceType {
       }
       Objects.requireNonNull(t.clientId(), "clientId is mandatory");
       Objects.requireNonNull(t.proxy_id_session(), "proxy_id_session is mandatory");
+      Objects.requireNonNull(t.session_state(), "proxy_id_session is mandatory");
+    }
+  }
+  ,
+  CONNECT_REPLAY {
+    @Override
+    public void validateImpl(Trace t) {
+      if(t.apiRequest()!=null) {
+        throw new IllegalArgumentException("No request data allowed in " + name()+" traces.");
+      }
+      Objects.requireNonNull(t.clientId(), "clientId is mandatory");
+      Objects.requireNonNull(t.proxy_id_session(), "proxy_id_session is mandatory");
+      Objects.requireNonNull(t.session_state(), "proxy_id_session is mandatory");
     }
   }
   , CONNECT_FAILURE{
@@ -52,6 +65,7 @@ public enum TraceType {
       Objects.requireNonNull(t.apiRequest(),"request is mandatory");
       Objects.requireNonNull(t.clientId(), "clientId is mandatory");
       Objects.requireNonNull(t.proxy_id_session(), "proxy_id_session is mandatory");
+      Objects.requireNonNull(t.session_state(), "proxy_id_session is mandatory");
     }
   }, DISCONNECT {
     @Override
@@ -61,6 +75,7 @@ public enum TraceType {
       }
       Objects.requireNonNull(t.clientId(), "clientId is mandatory");
       Objects.requireNonNull(t.proxy_id_session(), "proxy_id_session is mandatory");
+      Objects.requireNonNull(t.session_state(), "proxy_id_session is mandatory");
     }
   };
   

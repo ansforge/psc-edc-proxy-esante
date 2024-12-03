@@ -483,7 +483,6 @@ public class SessionTests extends AbstractProxyIntegrationTest {
                         + SessionTests.TEST_ID_TOKEN
                         + "\",\"scope\": \"openid ciba\", \"session_state\": \"session-state-512-xxx\"}")));
 
-    Session secondSession =
         testClient
             .post()
             .uri((UriBuilder b) -> b.path("/connect").build())
@@ -493,13 +492,9 @@ public class SessionTests extends AbstractProxyIntegrationTest {
             .exchange()
             .expectStatus()
             .isEqualTo(304)
-            .expectBody(Session.class)
-            .returnResult()
-            .getResponseBody();
+            .expectBody().isEmpty();
 
-    Assertions.assertEquals(session.proxySessionId(), secondSession.proxySessionId());
-    Assertions.assertEquals(session.sessionState(), secondSession.sessionState());
-        
+  //On vérifie que les serveurs aval ne sont pas rappelés - la session reste valide.
     pscMock.verify(1, 
       WireMock.postRequestedFor(
         WireMock.urlEqualTo("/auth/realms/esante-wallet/protocol/openid-connect/ext/ciba/auth")

@@ -58,14 +58,7 @@
             }
           },
           "304": {
-            "description": "User session already active",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/session"
-                }
-              }
-			}
+            "description": "User session already active - no content, no ProSanté Connect or downstream IdP calls."
           },
           "400": {
             "description": "Bad Request",

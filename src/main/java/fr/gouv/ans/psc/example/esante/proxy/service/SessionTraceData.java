@@ -22,36 +22,11 @@
  */
 package fr.gouv.ans.psc.example.esante.proxy.service;
 
-import fr.gouv.ans.psc.example.esante.proxy.model.Request;
-import fr.gouv.ans.psc.example.esante.proxy.model.Trace;
-import fr.gouv.ans.psc.example.esante.proxy.model.TraceType;
 import java.security.cert.X509Certificate;
-import java.time.OffsetDateTime;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
 
 /**
+ *
  * @author edegenetais
  */
-@Component
-public class TraceService {
-
-  public final List<Trace> store;
-
-  public TraceService() {
-    store = new LinkedList<>();
-  }
-  
-  public void record(TraceType traceType, SessionTraceData sessionTraceData, BaseTraceData baseTraceData, final Request outGoingRequest) {
-    Optional<X509Certificate> crt = sessionTraceData.clientCertificate();
-    final Trace newTrace = new Trace(traceType, sessionTraceData.clientId(), sessionTraceData.nationalId(), baseTraceData.remoteAddress(), baseTraceData.sourcePorts(), sessionTraceData.proxy_session_id(), sessionTraceData.sessionState(), crt.isPresent() ? crt.get().getSubjectX500Principal().toString() : null, OffsetDateTime.now(), outGoingRequest);
-    store.add(newTrace);
-  }
-
-  
-  public synchronized List<Trace> getTraces() {
-    return List.copyOf(store);
-  }
-}
+public record SessionTraceData (Optional<X509Certificate> clientCertificate, String clientId, String nationalId,String sessionState, String proxy_session_id){}

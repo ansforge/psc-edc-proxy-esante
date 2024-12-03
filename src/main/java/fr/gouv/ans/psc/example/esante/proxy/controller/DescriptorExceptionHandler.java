@@ -55,8 +55,8 @@ public class DescriptorExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler({Reconnect.class})
-  public ResponseEntity<Session> handleReconnect(Reconnect recon) {
-    return new ResponseEntity<>(recon.session,HttpStatusCode.valueOf(304));
+  public ResponseEntity<Void> handleReconnect(Reconnect recon) {
+    return new ResponseEntity<>(null,HttpStatusCode.valueOf(304));
   }
 
   @ExceptionHandler({FunctionalError.class})

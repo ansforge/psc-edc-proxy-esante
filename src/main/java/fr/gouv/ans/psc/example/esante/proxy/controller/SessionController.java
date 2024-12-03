@@ -69,7 +69,12 @@ public class SessionController {
       WebSession webSession) {
     connection.validate();
     if(webSession!=null && webSession.isStarted()) {
-      throw new Reconnect(webSession.getAttribute(SessionAttributes.PROXY_API_SESSION));
+      traceSrv.record(
+          TraceType.CONNECT_REPLAY,
+          TraceHelper.getSessionTraceData(webSession),
+          baseTraceData,
+          null);
+      throw new Reconnect();
     }
     Callable<Session> sessionSupplier =
         () -> {
@@ -90,21 +95,23 @@ public class SessionController {
             webSession.getAttributes().put(SessionAttributes.BACKEND_AUTH_ATTR, backendAuth);
 
             webSession.start();
-            this.traceSrv.record(
-                TraceType.CONNECT_SUCCESS,
-                webSession,
-                baseTraceData.remoteAddress(),
-                baseTraceData.sourcePorts(),
-                null);
             final Session session = new Session(sessionId, cibaSession.sessionState());
             webSession.getAttributes().put(SessionAttributes.PROXY_API_SESSION, session);
+            this.traceSrv.record(
+                TraceType.CONNECT_SUCCESS,
+                TraceHelper.getSessionTraceData(webSession),
+                baseTraceData,
+                null);
             return session;
           } catch (RuntimeException re) {
-            if(webSession!=null) {
+            if (webSession != null) {
               webSession.invalidate();
             }
             this.traceSrv.record(
-                TraceType.CONNECT_FAILURE, webSession, baseTraceData.remoteAddress(), baseTraceData.sourcePorts(), null);
+                TraceType.CONNECT_FAILURE, 
+                TraceHelper.getSessionTraceData(webSession),
+                baseTraceData,
+                null);
             throw re;
           }
         };
@@ -120,7 +127,11 @@ public class SessionController {
     if(webSession==null || !webSession.isStarted()) {
       return Mono.error(new UnauthorizedException("Session ID not found."));
     } else {
-      this.traceSrv.record(TraceType.DISCONNECT, webSession, baseTraceData.remoteAddress(), baseTraceData.sourcePorts(), null);
+      this.traceSrv.record(
+          TraceType.DISCONNECT,
+          TraceHelper.getSessionTraceData(webSession),
+          baseTraceData,
+          null);
       Callable<Void> sessionDestroyer = () -> {
         Mono<Void> sessionEnd = webSession.invalidate();
         String clientId = webSession.getAttribute(SessionAttributes.CLIENT_ID);
