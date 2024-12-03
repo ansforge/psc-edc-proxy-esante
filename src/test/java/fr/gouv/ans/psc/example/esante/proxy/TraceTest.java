@@ -93,6 +93,112 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
   }
   
   @Test
+  public void connectHasSessionStateInTrace() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .post()
+        .uri("/connect")
+        .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
+        .exchange().expectStatus().is2xxSuccessful();
+    
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    
+    final Trace connectTrace = traces.getFirst();
+    Assertions.assertEquals("session-state-256-xxx", connectTrace.session_state());
+  }
+  
+  @Test
+  public void connectNothingChanged304HasTraceWithSameSessionState() {
+    pscMock.stubFor(
+        WireMock.post(
+                "/auth/realms/esante-wallet/protocol/openid-connect/token")
+            .willReturn(
+                WireMock.okJson(
+                    "{\"access_token\": \""
+                        + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJTdWJqZWN0TmFtZUlEIjoiNTAwMDAwMDAxODE1NjQ2L0NQQVQwMDA0NSIsInNlc3Npb25fc3RhdGUiOiJzZXNzaW9uLXN0YXRlLTMwNC14eHgifQ.6EYyFEHN3UBPqtU0fl0B9y0qPeff77_JY0pJcrOQf9g"
+                        + "\",\"expires_in\": 120,\"refresh_token\": \""
+                        + SessionTests.REFRESH_TOKEN
+                        + "\",\"refresh_expires_in\": 350,\"token_type\":\"Bearer\",\"id_token\":\""
+                        + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjk2MjAwMDAsImlhdCI6MTUxNjIzOTAyMiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiY2xpZW50LWlkLW9mLXRlc3QiLCJTdWJqZWN0TmFtZUlEIjoiNTAwMDAwMDAxODE1NjQ2L0NQQVQwMDA0NSIsInNlc3Npb25fc3RhdGUiOiJzZXNzaW9uLXN0YXRlLTMwNC14eHgifQ.6EYyFEHN3UBPqtU0fl0B9y0qPeff77_JY0pJcrOQf9g"
+                        + "\",\"scope\": \"openid ciba\", \"session_state\": \"session-state-512-xxx\"}")));
+
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .post()
+        .uri("/connect")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
+        .exchange()
+        .expectStatus()
+        .is3xxRedirection();
+
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    
+    final Trace connectTrace = traces.getFirst();
+    Assertions.assertEquals("session-state-256-xxx", connectTrace.session_state());
+  }
+  
+    @Test
+  public void connectNothingChanged304CreatesReplayTrace() {
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient
+        .post()
+        .uri("/connect")
+        .cookie(SESSION_COOKIE_NAME, sessionId)
+        .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
+        .exchange()
+        .expectStatus()
+        .is3xxRedirection();
+
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    
+    final Trace connectTrace = traces.getFirst();
+    Assertions.assertEquals(TraceType.CONNECT_REPLAY, connectTrace.type());
+  }
+  
+  @Test
   public void acceptIso8061StartEndAndEnd() {
     String yesterdayNoonISO8601UTC = "2024-11-25T12:00:00.000Z";
     String yesterdayEveningISO8601UTC = "2024-11-25T21:00:00.000Z";
@@ -193,6 +299,49 @@ public class TraceTest  extends AbstractAuthenticatedProxyIntegrationTest {
             .returnResult()
             .getResponseBody();
     Assertions.assertEquals(session.proxySessionId(), traces.getFirst().proxy_id_session());
+  }
+  
+  @Test
+  public void sendOnSessionHasPSCSessionState() {
+    
+    Session session =
+        testClient
+            .post()
+            .uri("/connect")
+            .bodyValue(new Connection(ID_NAT, "42", "client-with-cert", "CARD"))
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBody(Session.class)
+            .returnResult().getResponseBody();
+
+    OffsetDateTime testBegin = OffsetDateTime.now();
+    testClient.get().uri("/send/backend-1/carebear1")
+        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .exchange().expectStatus().is2xxSuccessful();
+    OffsetDateTime testEnd = OffsetDateTime.now();
+    
+    testClient.delete().uri("/disconnect")
+        .cookie(SESSION_COOKIE_NAME, session.proxySessionId())
+        .exchange().expectStatus().isOk();
+
+    List<Trace> traces =
+        testClient
+            .get()
+            .uri(
+                (UriBuilder b) ->
+                    b.path("/traces")
+                        .queryParam("start", testBegin.format(DateTimeFormatter.ISO_INSTANT))
+                        .queryParam("end", testEnd.format(DateTimeFormatter.ISO_INSTANT))
+                        .build())
+            .exchange()
+            .expectStatus()
+            .is2xxSuccessful()
+            .expectBodyList(Trace.class)
+            .hasSize(1)
+            .returnResult()
+            .getResponseBody();
+    Assertions.assertEquals(session.sessionState(), traces.getFirst().session_state());
   }
   
   @Test

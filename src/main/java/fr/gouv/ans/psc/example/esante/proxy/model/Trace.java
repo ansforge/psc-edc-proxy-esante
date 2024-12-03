@@ -38,17 +38,19 @@ public record Trace(
     String ipAddress,
     List<Integer> ports,
     String proxy_id_session,
+    String session_state,
     String dn,
     OffsetDateTime timestamp,
     @JsonInclude(JsonInclude.Include.NON_NULL) Request apiRequest) {
 
-  public Trace(TraceType type,String clientId, String IdRPPS, String ipAddress, List<Integer> ports, String proxy_id_session, String dn, OffsetDateTime timestamp, Request apiRequest) {
+  public Trace(TraceType type,String clientId, String IdRPPS, String ipAddress, List<Integer> ports, String proxy_id_session, String session_state,String dn, OffsetDateTime timestamp, Request apiRequest) {
     this.type = type;
     this.clientId = clientId;
     this.IdRPPS = IdRPPS;
     this.ipAddress = ipAddress;
     this.ports = ports;
     this.proxy_id_session = proxy_id_session;
+    this.session_state = session_state;
     this.dn = dn;
     this.timestamp = timestamp;
     this.apiRequest = apiRequest;
