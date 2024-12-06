@@ -111,7 +111,7 @@ public class PSCSessionService {
       AuthRequestID cibaRequestID = acknowledgement.getAuthRequestID();
       int expiresIn = acknowledgement.getExpiresIn();
       int pollInterval = acknowledgement.getMinWaitInterval();
-      LOGGER.info("Préparation de la requête de polling");
+      LOGGER.info("Attente de l'authentification par l'utilisateur {}.", nationalId);
 
       TokenRequest tokenRequest =
           new TokenRequest.Builder(tokenURI, clientAuthentication, new CIBAGrant(cibaRequestID))
