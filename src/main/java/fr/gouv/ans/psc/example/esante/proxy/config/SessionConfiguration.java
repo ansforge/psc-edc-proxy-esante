@@ -23,6 +23,8 @@
 package fr.gouv.ans.psc.example.esante.proxy.config;
 
 import java.util.HashMap;
+
+import org.springframework.boot.autoconfigure.session.SessionProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.session.ReactiveMapSessionRepository;
@@ -41,9 +43,18 @@ import org.springframework.web.server.session.WebSessionIdResolver;
 public class SessionConfiguration {
   private static final String SESSION_COOKIE_NAME = "proxy_session_id";
   
+
+  private SessionProperties sessionProperties;
+  
+  
+  public SessionConfiguration(SessionProperties sessionProerties) {
+	  this.sessionProperties = sessionProerties;
+  }
+  
   @Bean
   public ReactiveSessionRepository<? extends Session> getSessionRepository(){
     final ReactiveMapSessionRepository reactiveMapSessionRepository = new ReactiveMapSessionRepository(new HashMap<>());
+    reactiveMapSessionRepository.setDefaultMaxInactiveInterval(sessionProperties.getTimeout());
     return reactiveMapSessionRepository;
   }
   

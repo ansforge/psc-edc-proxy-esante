@@ -24,6 +24,8 @@
 server:
   port: 8080
 spring:
+  session:
+    timeout: 14400
   cloud:
     gateway:
       httpclient:

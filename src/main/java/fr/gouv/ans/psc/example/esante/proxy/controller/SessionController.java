@@ -32,6 +32,9 @@ import fr.gouv.ans.psc.example.esante.proxy.service.CIBASession;
 import fr.gouv.ans.psc.example.esante.proxy.service.PSCSessionService;
 import fr.gouv.ans.psc.example.esante.proxy.service.TraceService;
 import java.util.concurrent.Callable;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,6 +54,8 @@ public class SessionController {
   private final PSCSessionService cibaService;
   private final BackendAuthenticationService backendAuthService;
   private final TraceService traceSrv;
+  
+  private static final Logger LOGGER = LoggerFactory.getLogger(SessionController.class);
   
   public SessionController(
       @Autowired PSCSessionService cibaService,
@@ -95,6 +100,7 @@ public class SessionController {
             webSession.getAttributes().put(SessionAttributes.BACKEND_AUTH_ATTR, backendAuth);
 
             webSession.start();
+            LOGGER.debug("MaxIdleTime in seconds : {}",webSession.getMaxIdleTime().getSeconds());
             final Session session = new Session(sessionId, cibaSession.sessionState());
             webSession.getAttributes().put(SessionAttributes.PROXY_API_SESSION, session);
             this.traceSrv.record(
