@@ -45,7 +45,7 @@
     <spring.cloud.version>2023.0.3</spring.cloud.version>
     <!-- 
       Downgrade Jetty 
-      parce que WireMock 9.3.1 n'est pas encore complètement compatible avec Jetty 12
+      parce que WireMock 3.9.1 n'est pas encore complètement compatible avec Jetty 12
       et nous ne l'utilisons pas dans le code applicatif.
     -->
     <jetty.component.version>11.0.24</jetty.component.version>
@@ -61,7 +61,7 @@
       </dependency>
       <!-- 
         Downgrade Jetty 
-        parce que WireMock 9.3.1 n'est pas encore complètement compatible avec Jetty 12
+        parce que WireMock 3.9.1 n'est pas encore complètement compatible avec Jetty 12
         et nous ne l'utilisons pas dans le code applicatif.
       -->
       <dependency>
