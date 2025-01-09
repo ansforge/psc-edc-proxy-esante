@@ -25,7 +25,12 @@ FROM maven:3.9.9-eclipse-temurin-21-jammy AS builder
 
 COPY . /src
 WORKDIR /src
-RUN mvn clean package
+RUN if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
+       echo -n "-Dlicense.current.year=$(git log -1 --format="%at" | xargs -I{} date -d @{} +%Y)" > /tmp/dateparm; \
+    else \
+       touch /tmp/dateparm; \
+    fi
+RUN mvn $(cat /tmp/dateparm) clean package
 
 FROM eclipse-temurin:21.0.5_11-jdk
 COPY --from=builder /src/target/psc-esante-proxy-example-*.jar /usr/app/psc-esante-proxy-example.jar
