@@ -193,12 +193,12 @@
       }
     },
     "/send": {
-      "security": [
-        {
-          "cookieAuth": []      
-        }
-      ],
       "get": {
+        "security": [
+          {
+            "cookieAuth": []      
+          }
+        ],
         "tags": [
           "Send"
         ],
