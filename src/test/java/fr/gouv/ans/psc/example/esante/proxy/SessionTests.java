@@ -226,7 +226,7 @@ public class SessionTests extends AbstractProxyIntegrationTest {
   }
   
   @Test
-  public void unavailablePSCReturns503() {
+  void unavailablePSCReturns503() {
     pscMock.stubFor(
         WireMock.any(
                 WireMock.urlEqualTo(

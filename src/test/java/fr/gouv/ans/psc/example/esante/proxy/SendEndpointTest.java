@@ -89,7 +89,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
   }
   
     @Test
-  public void useBackendTwoTokenForBackend2() {
+  void useBackendTwoTokenForBackend2() {
     final String reponseBody = "{\"status\": \"OK\"}";
     backend2.stubFor(
         WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
@@ -110,7 +110,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
   }
     
   @Test
-  public void sendWithoutSessionGives401() {
+  void sendWithoutSessionGives401() {
     final String reponseBody = "{\"status\": \"OK\"}";
     backend1.stubFor(
         WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
@@ -126,7 +126,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
   }
   
   @Test
-  public void sendGETWithoutSessionGivesExpectedPayload() {
+  void sendGETWithoutSessionGivesExpectedPayload() {
     final String reponseBody = "{\"status\": \"OK\"}";
     backend1.stubFor(
         WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
@@ -143,7 +143,7 @@ public class SendEndpointTest extends AbstractAuthenticatedProxyIntegrationTest 
   }
   
   @Test
-  public void sendPOSTWithoutSessionGivesExpectedPayload() {
+  void sendPOSTWithoutSessionGivesExpectedPayload() {
     final String reponseBody = "{\"status\": \"OK\"}";
     backend1.stubFor(
         WireMock.get(WireMock.urlEqualTo("/rsc1")).willReturn(WireMock.okJson(reponseBody)));
